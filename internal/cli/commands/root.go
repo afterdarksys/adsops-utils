@@ -8,6 +8,7 @@ import (
 	"github.com/afterdarksys/adsops-utils/internal/cli/commands/auth"
 	"github.com/afterdarksys/adsops-utils/internal/cli/commands/config"
 	"github.com/afterdarksys/adsops-utils/internal/cli/commands/ticket"
+	"github.com/afterdarksys/adsops-utils/internal/cli/commands/user"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -52,6 +53,7 @@ func init() {
 	rootCmd.AddCommand(approval.ApprovalCmd)
 	rootCmd.AddCommand(auth.AuthCmd)
 	rootCmd.AddCommand(config.ConfigCmd)
+	rootCmd.AddCommand(user.UserCmd)
 }
 
 func initConfig() {
