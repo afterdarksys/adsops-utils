@@ -1,0 +1,40 @@
+{
+  "id": "CHG-2025-00001",
+  "title": "Migration Wizard UX Improvements",
+  "description": "The Migration Wizard launched after Employee Central login needs UX improvements:\n\n1. **Add Skip Button** - Users should be able to skip the Migration Wizard and proceed directly to their destination\n\n2. **Conditional Launch** - Migration Wizard should NOT launch when logging in via Employee Central (platform=aeims). It should only launch for migration-specific login flows.",
+  "status": "draft",
+  "priority": "normal",
+  "risk": "low",
+  "type": "enhancement",
+  "industry": "it",
+  "compliance_frameworks": [],
+  "affected_systems": [
+    "login.afterdarksys.com",
+    "admin.afterdarksys.com"
+  ],
+  "acceptance_criteria": [
+    "Skip button visible on Migration Wizard",
+    "Clicking Skip redirects to intended destination",
+    "Employee Central logins (platform=aeims) bypass Migration Wizard entirely",
+    "Migration Wizard only appears for explicit migration flows"
+  ],
+  "testing_plan": "1. Login via Employee Central - verify no Migration Wizard\n2. Login with migration returnUrl - verify Migration Wizard appears\n3. Click Skip on Migration Wizard - verify redirect to destination\n4. Complete Migration Wizard - verify normal flow works",
+  "rollback_plan": "Revert login-sso deployment to v1.2.6 if issues occur",
+  "created_by": "rjc@afterdarksys.com",
+  "created_at": "2025-12-26T09:39:00Z",
+  "updated_at": "2025-12-26T09:39:00Z",
+  "sprint": "2025-Q1-Sprint-1",
+  "assignee": null,
+  "approvals_required": [
+    "operations",
+    "it"
+  ],
+  "approvals": [],
+  "comments": [
+    {
+      "author": "claude@afterdarksys.com",
+      "timestamp": "2025-12-26T09:39:00Z",
+      "text": "Ticket created from user feedback. Ryan confirmed logins are working but Migration Wizard UX needs improvement."
+    }
+  ]
+}

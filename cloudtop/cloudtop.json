@@ -1,0 +1,130 @@
+{
+  "version": "1.0",
+  "providers": {
+    "azure": {
+      "enabled": false,
+      "auth": {
+        "method": "service_account",
+        "key_file": "~/.azure/credentials.json"
+      },
+      "services": [
+        "vms",
+        "aks",
+        "functions"
+      ],
+      "options": {
+        "subscription_id": "your-subscription-id"
+      }
+    },
+    "cloudflare": {
+      "enabled": true,
+      "auth": {
+        "method": "api_key",
+        "env_api_key": "CLOUDFLARE_API_TOKEN"
+      },
+      "services": [
+        "workers",
+        "r2",
+        "ai"
+      ],
+      "rate_limit": {
+        "requests_per_second": 4,
+        "burst": 10,
+        "timeout": "30s"
+      },
+      "options": {
+        "account_id": "your-account-id"
+      }
+    },
+    "gcp": {
+      "enabled": false,
+      "auth": {
+        "method": "service_account",
+        "key_file": "~/.gcp/service-account.json"
+      },
+      "services": [
+        "compute",
+        "gke",
+        "functions"
+      ],
+      "options": {
+        "project_id": "your-project-id"
+      }
+    },
+    "neon": {
+      "enabled": true,
+      "auth": {
+        "method": "api_key",
+        "env_api_key": "NEON_API_KEY"
+      }
+    },
+    "oracle": {
+      "enabled": true,
+      "auth": {
+        "method": "service_account",
+        "key_file": "~/.oci/config"
+      },
+      "regions": [
+        "us-ashburn-1"
+      ],
+      "services": [
+        "compute",
+        "containers",
+        "autonomous_db"
+      ],
+      "rate_limit": {
+        "requests_per_second": 10,
+        "burst": 20,
+        "timeout": "30s"
+      },
+      "options": {
+        "compartment_id": "ocid1.tenancy.oc1..aaaaaaaaiqfc57o25y3424skethbodacbasc2zy3yp2b423zj6qkhcwjkqta"
+      }
+    },
+    "runpod": {
+      "enabled": true,
+      "auth": {
+        "method": "api_key",
+        "env_api_key": "RUNPOD_API_KEY"
+      }
+    },
+    "vastai": {
+      "enabled": true,
+      "auth": {
+        "method": "api_key",
+        "env_api_key": "VASTAI_API_KEY"
+      }
+    }
+  },
+  "defaults": {
+    "refresh_interval": "30s",
+    "output_format": "table",
+    "show_cached": true
+  },
+  "output": {
+    "color_enabled": true,
+    "timestamps": true,
+    "columns": {
+      "compute": [
+        "name",
+        "status",
+        "cpu",
+        "memory",
+        "region"
+      ],
+      "gpu": [
+        "name",
+        "gpu_type",
+        "gpu_count",
+        "utilization",
+        "price"
+      ]
+    }
+  },
+  "cache": {
+    "enabled": true,
+    "backend": "memory",
+    "ttl": "5m0s",
+    "max_size": 1000
+  }
+}

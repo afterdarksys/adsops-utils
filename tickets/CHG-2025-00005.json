@@ -1,0 +1,41 @@
+{
+  "id": "CHG-2025-00005",
+  "title": "Deploy Keycloak DNS Records (id.dnsscience.io)",
+  "description": "Deploy DNS records for Keycloak identity service after OCI infrastructure deployment.\n\n## Prerequisites\n- CHG-2025-00002 (Keycloak OCI Infrastructure) - COMPLETED\n- OCI credentials configured in terraform.tfvars\n- Keycloak instance IP address available\n\n## DNS Records Required\n\n### Primary\n- `id.dnsscience.io` → A record → Keycloak public IP\n\n### Aliases (CNAME)\n- `auth.dnsscience.io` → id.dnsscience.io\n- `sso.dnsscience.io` → id.dnsscience.io\n\n### CAA Record\n- Authorize Let's Encrypt for certificate issuance\n\n## Current Status\n- DNS lookup for id.dnsscience.io returns: NO RECORDS\n- Terraform DNS module ready in keycloak-oci/terraform/modules/dns\n\n## Deployment Steps\n1. Configure terraform.tfvars with OCI credentials\n2. Run `terraform plan` to verify DNS changes\n3. Run `terraform apply` to create DNS records\n4. Verify DNS propagation with `dig +short id.dnsscience.io`\n5. Request TLS certificate via cert-manager or Let's Encrypt",
+  "status": "pending",
+  "priority": "high",
+  "risk": "low",
+  "type": "infrastructure",
+  "industry": "it",
+  "compliance_frameworks": [],
+  "affected_systems": [
+    "id.dnsscience.io",
+    "auth.dnsscience.io",
+    "sso.dnsscience.io"
+  ],
+  "acceptance_criteria": [
+    "id.dnsscience.io resolves to Keycloak IP",
+    "auth.dnsscience.io and sso.dnsscience.io CNAMEs working",
+    "Valid TLS certificate deployed",
+    "Keycloak admin console accessible via HTTPS"
+  ],
+  "testing_plan": "1. dig +short id.dnsscience.io - verify A record\n2. curl -I https://id.dnsscience.io - verify HTTPS working\n3. curl -I https://auth.dnsscience.io - verify CNAME\n4. Access /admin console in browser",
+  "rollback_plan": "Delete DNS records via terraform destroy -target=module.dns",
+  "created_by": "claude@afterdarksys.com",
+  "created_at": "2025-12-26T20:45:00Z",
+  "updated_at": "2025-12-26T20:45:00Z",
+  "sprint": "2025-Q1-Sprint-1",
+  "assignee": null,
+  "approvals_required": [
+    "operations"
+  ],
+  "approvals": [],
+  "dependencies": ["CHG-2025-00002"],
+  "comments": [
+    {
+      "author": "claude@afterdarksys.com",
+      "timestamp": "2025-12-26T20:45:00Z",
+      "text": "Blocked on OCI credential configuration. Infrastructure code is ready in keycloak-oci repo."
+    }
+  ]
+}

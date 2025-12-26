@@ -1,0 +1,42 @@
+{
+  "id": "CHG-2025-00004",
+  "title": "Complete secretserver.io Keycloak Integration",
+  "description": "Integrate secretserver.io with Keycloak identity services for Managed Identity Solutions product.\n\n## Current State\n- **Vault Integration**: COMPLETE - Full tenant isolation, policy-based access\n- **Identity Handlers**: PARTIAL - API stubs implemented, need Keycloak client\n- **Billing Integration**: COMPLETE - Stripe products and pricing tiers defined\n- **Database Schema**: COMPLETE - Migration 005 with identity tables\n\n## Required Work\n\n### 1. Keycloak Client Integration\n- Add Keycloak Go SDK to secretserver.io\n- Implement realm CRUD operations against Keycloak admin API\n- Connect identity handlers to actual Keycloak operations\n\n### 2. Authentication Flow\n- OIDC authentication for secretserver.io API\n- Token validation middleware\n- SSO between Vault UI and Keycloak\n\n### 3. Provisioning Flow\n- On subscription activation → Create Keycloak realm\n- On subscription cancellation → Disable (not delete) realm\n- Sync user limits from Stripe tier to Keycloak quotas\n\n### 4. Stripe Webhook Handlers\n- Complete webhook handler implementations in internal/billing/stripe.go\n- Trigger Keycloak realm provisioning on checkout.session.completed\n- Update limits on subscription tier changes\n\n## Related Files\n- keycloak-oci/terraform/ - Infrastructure code\n- keycloak-oci/ansible/ - Deployment automation\n- secretserver.io/internal/api/handlers/identity.go - API handlers\n- secretserver.io/internal/billing/stripe.go - Stripe integration\n- secretserver.io/migrations/005_identity_tables.sql - Database schema",
+  "status": "in_progress",
+  "priority": "normal",
+  "risk": "medium",
+  "type": "new_feature",
+  "industry": "it",
+  "compliance_frameworks": ["SOC2"],
+  "affected_systems": [
+    "secretserver.io",
+    "id.dnsscience.io",
+    "vault.secretserver.io"
+  ],
+  "acceptance_criteria": [
+    "Keycloak client library integrated in secretserver.io",
+    "Identity API handlers fully functional (not stubs)",
+    "Realm creation triggers on subscription activation",
+    "OIDC authentication working for API access",
+    "Integration tests passing for identity flows"
+  ],
+  "testing_plan": "1. Unit tests for Keycloak client operations\n2. Integration tests with staging Keycloak\n3. E2E test: Subscribe → Realm created → User created → Auth works\n4. Stripe webhook simulation testing",
+  "rollback_plan": "Feature flag to disable identity features, fall back to secrets-only mode",
+  "created_by": "claude@afterdarksys.com",
+  "created_at": "2025-12-26T20:45:00Z",
+  "updated_at": "2025-12-26T20:45:00Z",
+  "sprint": "2025-Q1-Sprint-1",
+  "assignee": "claude@afterdarksys.com",
+  "approvals_required": [
+    "operations",
+    "it"
+  ],
+  "approvals": [],
+  "comments": [
+    {
+      "author": "claude@afterdarksys.com",
+      "timestamp": "2025-12-26T20:45:00Z",
+      "text": "Current status assessment:\n- Vault client: COMPLETE (internal/vault/client.go)\n- Identity handlers: API stubs only, TODO comments present\n- Billing: Stripe client complete, webhook handlers have TODOs\n- Database: Schema ready (migrations/005)"
+    }
+  ]
+}

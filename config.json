@@ -1,0 +1,36 @@
+{
+  "oci": {
+    "profile": "DEFAULT",
+    "compartment_ocid": "",
+    "bastion_ocid": "",
+    "vault_ocid": "",
+    "key_ocid": "",
+    "namespace": ""
+  },
+  "ssh": {
+    "key_path": "~/.ssh/id_rsa",
+    "default_user": "opc"
+  },
+  "terraform": {
+    "state_bucket": "terraform-state",
+    "lock_bucket": "terraform-locks"
+  },
+  "sessions": {
+    "default_ttl": 10800,
+    "tunnel_dir": "/tmp/oci-tunnels"
+  },
+  "environments": {
+    "dev": {
+      "compartment_ocid": "",
+      "bastion_ocid": ""
+    },
+    "staging": {
+      "compartment_ocid": "",
+      "bastion_ocid": ""
+    },
+    "prod": {
+      "compartment_ocid": "",
+      "bastion_ocid": ""
+    }
+  }
+}

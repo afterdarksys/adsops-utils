@@ -1,0 +1,43 @@
+{
+  "id": "CHG-2025-00003",
+  "title": "Fix SSL Certificates - Priority Sites",
+  "description": "Multiple priority sites are returning DEPTH_ZERO_SELF_SIGNED_CERT errors, indicating SSL certificate issues.\n\n## Affected Sites\n- **secretserver.io** - Core product site, SSL failing\n- **billing.afterdarksys.com** - Billing portal, critical\n- **llmsecurity.dev** - AI Security platform\n- **computeapi.io** - Compute API platform\n\n## Root Cause\nSelf-signed certificates deployed instead of valid certificates from:\n- Let's Encrypt (via Cloudflare)\n- DNSScience.io certificate service\n- OCI Load Balancer SSL termination\n\n## Resolution Options\n1. **Cloudflare Proxy** - Enable Cloudflare proxy for automatic SSL\n2. **cert-manager** - Deploy cert-manager with Let's Encrypt ClusterIssuer\n3. **DNSScience.io** - Use internal certificate service\n\n## Validation Report Reference\nTest run: 2025-12-26T20:40:54.656Z\n- 85 total failures identified\n- 4 sites with SSL issues (blocking 24+ individual tests)",
+  "status": "pending",
+  "priority": "high",
+  "risk": "high",
+  "type": "bug_fix",
+  "industry": "it",
+  "compliance_frameworks": ["SOC2", "PCI-DSS"],
+  "affected_systems": [
+    "secretserver.io",
+    "billing.afterdarksys.com",
+    "llmsecurity.dev",
+    "computeapi.io"
+  ],
+  "acceptance_criteria": [
+    "All 4 sites return valid SSL certificates",
+    "No DEPTH_ZERO_SELF_SIGNED_CERT errors in validation tests",
+    "SSL certificate expiration > 30 days",
+    "Validation test pass rate increases from 94% to 98%+"
+  ],
+  "testing_plan": "1. Run `npm test` in afterdark-validation-kit\n2. Verify each site with `curl -I https://[site]`\n3. Check certificate details with `openssl s_client -connect [site]:443`\n4. Confirm CDN/Cloudflare tests pass",
+  "rollback_plan": "Revert DNS/Cloudflare configuration if issues occur",
+  "created_by": "claude@afterdarksys.com",
+  "created_at": "2025-12-26T20:45:00Z",
+  "updated_at": "2025-12-26T20:45:00Z",
+  "sprint": "2025-Q1-Sprint-1",
+  "assignee": null,
+  "approvals_required": [
+    "operations",
+    "it",
+    "security"
+  ],
+  "approvals": [],
+  "comments": [
+    {
+      "author": "claude@afterdarksys.com",
+      "timestamp": "2025-12-26T20:45:00Z",
+      "text": "Ticket created from validation pipeline run. These SSL issues are blocking production readiness for secretserver.io and related services."
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+0. wrapper scripts to use this project
+1. can we make wrapper scripts for doing bastion operations
+ 1a. wrapper scripts for the osm session manager
+2. wrapper scripts for patch management
+3. wrapper scripts for accessing the parameter store
+4. wrapper scripts for accessing the state management
+5. wrapper scripts for OS Management
+6. wrapper scripts for accessing the managed jump host
+7. wrapper scripts for managed backend sessions
+8. bash versions of all the above
+9. python versions of all the above put bash scripts in on directory, python in another, and then a sript in the root directory written in python with a json config file that provides access to all of the above functionality

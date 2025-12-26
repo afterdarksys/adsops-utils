@@ -39,7 +39,7 @@ func (c *Collector) Collect(ctx context.Context, req *CollectRequest) (*output.C
 
 	// Set default timeout if not specified
 	if req.Timeout == 0 {
-		req.Timeout = 30 * time.Second
+		req.Timeout = 60 * time.Second
 	}
 
 	// Create context with timeout

@@ -3,13 +3,19 @@ package oracle
 import (
 	"bufio"
 	"context"
+	"crypto"
+	"crypto/rand"
 	"crypto/rsa"
+	"crypto/sha256"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -76,9 +82,22 @@ func (p *OracleProvider) Initialize(ctx context.Context, config *provider.Provid
 		p.region = region
 	}
 
-	// Create HTTP client
+	// Create HTTP client with IPv4-only transport (OCI has IPv6 issues)
+	dialer := &net.Dialer{
+		Timeout:   30 * time.Second,
+		KeepAlive: 30 * time.Second,
+	}
+	transport := &http.Transport{
+		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+			return dialer.DialContext(ctx, "tcp4", addr)
+		},
+		MaxIdleConns:        100,
+		IdleConnTimeout:     90 * time.Second,
+		TLSHandshakeTimeout: 10 * time.Second,
+	}
 	p.client = &http.Client{
-		Timeout: 60 * time.Second,
+		Transport: transport,
+		Timeout:   60 * time.Second,
 	}
 
 	// Set up rate limiter
@@ -316,22 +335,23 @@ type ociAvailabilityDomain struct {
 
 // Private methods
 func (p *OracleProvider) getBaseURL(service string) string {
-	return fmt.Sprintf("https://%s.%s.oraclecloud.com", service, p.region)
+	return fmt.Sprintf("https://%s.%s.oci.oraclecloud.com", service, p.region)
 }
 
-func (p *OracleProvider) doRequest(ctx context.Context, method, url string) ([]byte, error) {
+func (p *OracleProvider) doRequest(ctx context.Context, method, requestURL string) ([]byte, error) {
 	if err := p.limiter.Wait(ctx); err != nil {
 		return nil, errors.NewRateLimitError("oracle", err)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, method, url, nil)
+	req, err := http.NewRequestWithContext(ctx, method, requestURL, nil)
 	if err != nil {
 		return nil, errors.NewInternalError("oracle", err)
 	}
 
-	// Add OCI authentication headers (simplified - production would use proper signing)
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Date", time.Now().UTC().Format(http.TimeFormat))
+	// Sign the request with OCI authentication
+	if err := p.signRequest(req); err != nil {
+		return nil, errors.NewAuthError("oracle", err)
+	}
 
 	resp, err := p.client.Do(req)
 	if err != nil {
@@ -349,6 +369,66 @@ func (p *OracleProvider) doRequest(ctx context.Context, method, url string) ([]b
 	}
 
 	return body, nil
+}
+
+// signRequest signs an HTTP request for OCI authentication
+func (p *OracleProvider) signRequest(req *http.Request) error {
+	// Required headers for GET requests
+	requiredHeaders := []string{"date", "(request-target)", "host"}
+
+	// Set date header
+	dateStr := time.Now().UTC().Format(http.TimeFormat)
+	req.Header.Set("Date", dateStr)
+	req.Header.Set("Content-Type", "application/json")
+
+	// Parse URL for host
+	parsedURL, err := url.Parse(req.URL.String())
+	if err != nil {
+		return fmt.Errorf("failed to parse URL: %w", err)
+	}
+	req.Header.Set("Host", parsedURL.Host)
+
+	// Build the signing string
+	var signingParts []string
+	for _, header := range requiredHeaders {
+		var value string
+		switch header {
+		case "(request-target)":
+			path := parsedURL.Path
+			if parsedURL.RawQuery != "" {
+				path += "?" + parsedURL.RawQuery
+			}
+			value = fmt.Sprintf("%s: %s %s", header, strings.ToLower(req.Method), path)
+		case "host":
+			value = fmt.Sprintf("%s: %s", header, parsedURL.Host)
+		case "date":
+			value = fmt.Sprintf("%s: %s", header, dateStr)
+		default:
+			value = fmt.Sprintf("%s: %s", header, req.Header.Get(strings.Title(header)))
+		}
+		signingParts = append(signingParts, value)
+	}
+
+	signingString := strings.Join(signingParts, "\n")
+
+	// Hash and sign
+	hashed := sha256.Sum256([]byte(signingString))
+	signature, err := rsa.SignPKCS1v15(rand.Reader, p.privateKey, crypto.SHA256, hashed[:])
+	if err != nil {
+		return fmt.Errorf("failed to sign request: %w", err)
+	}
+
+	// Build authorization header
+	keyID := fmt.Sprintf("%s/%s/%s", p.tenancyID, p.userID, p.fingerprint)
+	authHeader := fmt.Sprintf(
+		`Signature version="1",keyId="%s",algorithm="rsa-sha256",headers="%s",signature="%s"`,
+		keyID,
+		strings.Join(requiredHeaders, " "),
+		base64.StdEncoding.EncodeToString(signature),
+	)
+
+	req.Header.Set("Authorization", authHeader)
+	return nil
 }
 
 func (p *OracleProvider) listAvailabilityDomains(ctx context.Context) ([]ociAvailabilityDomain, error) {
