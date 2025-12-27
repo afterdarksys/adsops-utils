@@ -8,6 +8,7 @@ import (
 	"github.com/afterdarksys/adsops-utils/internal/cli/commands/auth"
 	"github.com/afterdarksys/adsops-utils/internal/cli/commands/config"
 	"github.com/afterdarksys/adsops-utils/internal/cli/commands/employee"
+	"github.com/afterdarksys/adsops-utils/internal/cli/commands/entitlement"
 	"github.com/afterdarksys/adsops-utils/internal/cli/commands/group"
 	"github.com/afterdarksys/adsops-utils/internal/cli/commands/ticket"
 	"github.com/afterdarksys/adsops-utils/internal/cli/commands/user"
@@ -19,14 +20,15 @@ var (
 	cfgFile string
 	rootCmd = &cobra.Command{
 		Use:   "changes",
-		Short: "After Dark Systems Change Management CLI",
-		Long: `A CLI tool for managing change tickets in the After Dark Systems
-Change Management platform.
+		Short: "After Dark Systems Operations CLI",
+		Long: `A CLI tool for After Dark Systems operations and administration.
 
 This tool allows you to:
   - Create, view, edit, and manage change tickets
   - Approve or deny change requests
   - Track compliance and audit trails
+  - Manage user entitlements across all domains
+  - Manage employees and groups
   - Integrate with your CI/CD pipelines`,
 	}
 )
@@ -58,6 +60,7 @@ func init() {
 	rootCmd.AddCommand(user.UserCmd)
 	rootCmd.AddCommand(employee.EmployeeCmd)
 	rootCmd.AddCommand(group.GroupCmd)
+	rootCmd.AddCommand(entitlement.EntitlementCmd)
 }
 
 func initConfig() {
