@@ -52,7 +52,9 @@ func RefreshToken(c *gin.Context)       { notImplemented(c) }
 func GetCurrentUser(c *gin.Context)     { notImplemented(c) }
 func Logout(c *gin.Context)             { notImplemented(c) }
 
-// Ticket handlers
+// Ticket handlers - now implemented in ticket_handlers.go
+// These stub functions remain for backwards compatibility with existing router
+// New code should use TicketHandler struct methods directly
 func CreateTicket(c *gin.Context)       { notImplemented(c) }
 func ListTickets(c *gin.Context)        { notImplemented(c) }
 func GetTicket(c *gin.Context)          { notImplemented(c) }
@@ -63,6 +65,52 @@ func CloseTicket(c *gin.Context)        { notImplemented(c) }
 func ReopenTicket(c *gin.Context)       { notImplemented(c) }
 func GetTicketRevisions(c *gin.Context) { notImplemented(c) }
 func GetTicketAudit(c *gin.Context)     { notImplemented(c) }
+
+// Additional ticket endpoints
+func GetTicketQueue(c *gin.Context)     { notImplemented(c) }
+func AssignTicket(c *gin.Context)       { notImplemented(c) }
+func LinkRepository(c *gin.Context)     { notImplemented(c) }
+func UnlinkRepository(c *gin.Context)   { notImplemented(c) }
+func AddWatcher(c *gin.Context)         { notImplemented(c) }
+func RemoveWatcher(c *gin.Context)      { notImplemented(c) }
+
+// Repository handlers
+func ListRepositories(c *gin.Context)   { notImplemented(c) }
+func CreateRepository(c *gin.Context)   { notImplemented(c) }
+func GetRepository(c *gin.Context)      { notImplemented(c) }
+func UpdateRepository(c *gin.Context)   { notImplemented(c) }
+func DeleteRepository(c *gin.Context)   { notImplemented(c) }
+
+// Project handlers
+func ListProjects(c *gin.Context)       { notImplemented(c) }
+func CreateProject(c *gin.Context)      { notImplemented(c) }
+func GetProject(c *gin.Context)         { notImplemented(c) }
+func UpdateProject(c *gin.Context)      { notImplemented(c) }
+func DeleteProject(c *gin.Context)      { notImplemented(c) }
+
+// Group handlers
+func ListGroups(c *gin.Context)         { notImplemented(c) }
+func CreateGroup(c *gin.Context)        { notImplemented(c) }
+func GetGroup(c *gin.Context)           { notImplemented(c) }
+func UpdateGroup(c *gin.Context)        { notImplemented(c) }
+func DeleteGroup(c *gin.Context)        { notImplemented(c) }
+func AddGroupMember(c *gin.Context)     { notImplemented(c) }
+func RemoveGroupMember(c *gin.Context)  { notImplemented(c) }
+
+// Employee directory handlers
+func SearchEmployees(c *gin.Context)    { notImplemented(c) }
+func GetEmployee(c *gin.Context)        { notImplemented(c) }
+func UpdateEmployee(c *gin.Context)     { notImplemented(c) }
+
+// Ticket ACL handlers
+func GetTicketACLs(c *gin.Context)      { notImplemented(c) }
+func GrantTicketACL(c *gin.Context)     { notImplemented(c) }
+func RevokeTicketACL(c *gin.Context)    { notImplemented(c) }
+
+// Failed signup handlers
+func CollectFailedSignupContact(c *gin.Context) { notImplemented(c) }
+func ListFailedSignups(c *gin.Context)          { notImplemented(c) }
+func ResolveFailedSignup(c *gin.Context)        { notImplemented(c) }
 
 // Approval handlers
 func ListApprovals(c *gin.Context)      { notImplemented(c) }

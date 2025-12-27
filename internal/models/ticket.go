@@ -46,11 +46,34 @@ type Ticket struct {
 	DeletedAt                    *time.Time            `db:"deleted_at" json:"deleted_at,omitempty"`
 	DeletionReason               *string               `db:"deletion_reason" json:"deletion_reason,omitempty"`
 
+	// JIRA-like fields (from migration 002)
+	ProjectID         *uuid.UUID  `db:"project_id" json:"project_id,omitempty"`
+	OwningGroupID     *uuid.UUID  `db:"owning_group_id" json:"owning_group_id,omitempty"`
+	CustomerID        *uuid.UUID  `db:"customer_id" json:"customer_id,omitempty"`
+	ParentTicketID    *uuid.UUID  `db:"parent_ticket_id" json:"parent_ticket_id,omitempty"`
+	EpicID            *uuid.UUID  `db:"epic_id" json:"epic_id,omitempty"`
+	StoryPoints       *int        `db:"story_points" json:"story_points,omitempty"`
+	TimeEstimateHours *float64    `db:"time_estimate_hours" json:"time_estimate_hours,omitempty"`
+	TimeSpentHours    *float64    `db:"time_spent_hours" json:"time_spent_hours,omitempty"`
+	Labels            []string    `db:"labels" json:"labels,omitempty"`
+	Watchers          []uuid.UUID `db:"watchers" json:"watchers,omitempty"`
+	ExternalReference *string     `db:"external_reference" json:"external_reference,omitempty"`
+	ACLInheritance    bool        `db:"acl_inheritance" json:"acl_inheritance"`
+	IsConfidential    bool        `db:"is_confidential" json:"is_confidential"`
+
 	// Relationships (populated via joins)
-	Creator      *UserSummary `db:"-" json:"creator,omitempty"`
-	Assignee     *UserSummary `db:"-" json:"assignee,omitempty"`
-	Approvals    []Approval   `db:"-" json:"approvals,omitempty"`
-	Comments     []Comment    `db:"-" json:"comments,omitempty"`
+	Creator       *UserSummary     `db:"-" json:"creator,omitempty"`
+	Assignee      *UserSummary     `db:"-" json:"assignee,omitempty"`
+	Approvals     []Approval       `db:"-" json:"approvals,omitempty"`
+	Comments      []Comment        `db:"-" json:"comments,omitempty"`
+	Project       *ProjectSummary  `db:"-" json:"project,omitempty"`
+	OwningGroup   *GroupSummary    `db:"-" json:"owning_group,omitempty"`
+	Customer      *CustomerSummary `db:"-" json:"customer,omitempty"`
+	ParentTicket  *TicketSummary   `db:"-" json:"parent_ticket,omitempty"`
+	Epic          *TicketSummary   `db:"-" json:"epic,omitempty"`
+	Repositories  []TicketRepository `db:"-" json:"repositories,omitempty"`
+	ACLs          []TicketACL      `db:"-" json:"acls,omitempty"`
+	Contacts      []Contact        `db:"-" json:"contacts,omitempty"`
 }
 
 // IsDraft returns true if the ticket is in draft status
@@ -139,6 +162,22 @@ type CreateTicketInput struct {
 	ApprovalDeadline            *time.Time            `json:"approval_deadline,omitempty"`
 	CustomFields                json.RawMessage       `json:"custom_fields,omitempty"`
 	Submit                      bool                  `json:"submit"` // true = submit immediately, false = save as draft
+
+	// JIRA-like fields
+	ProjectID         *uuid.UUID  `json:"project_id,omitempty"`
+	OwningGroupID     *uuid.UUID  `json:"owning_group_id,omitempty"`
+	CustomerID        *uuid.UUID  `json:"customer_id,omitempty"`
+	ParentTicketID    *uuid.UUID  `json:"parent_ticket_id,omitempty"`
+	EpicID            *uuid.UUID  `json:"epic_id,omitempty"`
+	StoryPoints       *int        `json:"story_points,omitempty"`
+	TimeEstimateHours *float64    `json:"time_estimate_hours,omitempty"`
+	Labels            []string    `json:"labels,omitempty"`
+	Watchers          []uuid.UUID `json:"watchers,omitempty"`
+	ExternalReference *string     `json:"external_reference,omitempty"`
+	IsConfidential    bool        `json:"is_confidential"`
+
+	// Contact info for ticket
+	Contacts []CreateContactInput `json:"contacts,omitempty"`
 }
 
 // UpdateTicketInput represents input for updating a ticket
@@ -162,6 +201,20 @@ type UpdateTicketInput struct {
 	ApprovalDeadline            *time.Time            `json:"approval_deadline,omitempty"`
 	CustomFields                json.RawMessage       `json:"custom_fields,omitempty"`
 	AssignedTo                  *uuid.UUID            `json:"assigned_to,omitempty"`
+
+	// JIRA-like fields
+	ProjectID         *uuid.UUID  `json:"project_id,omitempty"`
+	OwningGroupID     *uuid.UUID  `json:"owning_group_id,omitempty"`
+	CustomerID        *uuid.UUID  `json:"customer_id,omitempty"`
+	ParentTicketID    *uuid.UUID  `json:"parent_ticket_id,omitempty"`
+	EpicID            *uuid.UUID  `json:"epic_id,omitempty"`
+	StoryPoints       *int        `json:"story_points,omitempty"`
+	TimeEstimateHours *float64    `json:"time_estimate_hours,omitempty"`
+	TimeSpentHours    *float64    `json:"time_spent_hours,omitempty"`
+	Labels            []string    `json:"labels,omitempty"`
+	Watchers          []uuid.UUID `json:"watchers,omitempty"`
+	ExternalReference *string     `json:"external_reference,omitempty"`
+	IsConfidential    *bool       `json:"is_confidential,omitempty"`
 }
 
 // TicketRevision represents a change history entry for a ticket
@@ -197,6 +250,17 @@ type TicketListFilter struct {
 	PerPage             int                   `json:"per_page" validate:"min=1,max=100"`
 	SortBy              string                `json:"sort_by,omitempty"`
 	SortOrder           string                `json:"sort_order,omitempty"` // asc or desc
+
+	// JIRA-like filters
+	ProjectID      *uuid.UUID `json:"project_id,omitempty"`
+	OwningGroupID  *uuid.UUID `json:"owning_group_id,omitempty"`
+	CustomerID     *uuid.UUID `json:"customer_id,omitempty"`
+	EpicID         *uuid.UUID `json:"epic_id,omitempty"`
+	ParentTicketID *uuid.UUID `json:"parent_ticket_id,omitempty"`
+	Labels         []string   `json:"labels,omitempty"`
+	WatchedBy      *uuid.UUID `json:"watched_by,omitempty"`
+	IsConfidential *bool      `json:"is_confidential,omitempty"`
+	NeedsAssignment bool      `json:"needs_assignment,omitempty"` // For queue bot
 }
 
 // SetDefaults sets default values for the filter
