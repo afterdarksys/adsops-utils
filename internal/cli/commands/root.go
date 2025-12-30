@@ -9,6 +9,7 @@ import (
 	"github.com/afterdarksys/adsops-utils/internal/cli/commands/config"
 	"github.com/afterdarksys/adsops-utils/internal/cli/commands/employee"
 	"github.com/afterdarksys/adsops-utils/internal/cli/commands/entitlement"
+	"github.com/afterdarksys/adsops-utils/internal/cli/commands/ghmigrate"
 	"github.com/afterdarksys/adsops-utils/internal/cli/commands/group"
 	"github.com/afterdarksys/adsops-utils/internal/cli/commands/ticket"
 	"github.com/afterdarksys/adsops-utils/internal/cli/commands/user"
@@ -61,6 +62,7 @@ func init() {
 	rootCmd.AddCommand(employee.EmployeeCmd)
 	rootCmd.AddCommand(group.GroupCmd)
 	rootCmd.AddCommand(entitlement.EntitlementCmd)
+	rootCmd.AddCommand(ghmigrate.GHMigrateCmd)
 }
 
 func initConfig() {
