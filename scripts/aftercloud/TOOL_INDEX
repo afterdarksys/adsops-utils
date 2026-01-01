@@ -1,0 +1,157 @@
+ADSOPS-UTILS TOOL INDEX
+========================
+After Dark Systems Operations Utilities
+All tools designed for screen reader accessibility.
+
+Configuration stored at: ~/.adsops_config/config.json (never in repo)
+
+
+================================================================================
+CONFIGURATION
+================================================================================
+
+0 - adsops_config.py: Centralized config manager (API keys, tokens, credentials)
+    adsops_config.py init                         # Create config file
+    adsops_config.py show                         # Show config (secrets masked)
+    adsops_config.py set cloudflare.api_token XXX # Set a value
+    adsops_config.py get neon.api_key             # Get a value
+
+
+================================================================================
+MAIN CLI TOOLS
+================================================================================
+
+1 - changes: Change management CLI (tickets, approvals, users, SSO, vault)
+    changes ticket list
+    changes ticket create --title "Deploy update" --priority high
+    changes approval list --pending
+    changes sso users list
+    changes vault get secret-name
+
+2 - cloudtop (Go): Multi-cloud resource monitor (Oracle, Cloudflare, Neon, GPU)
+    ./cloudtop --all
+    ./cloudtop --oracle --running
+    ./cloudtop --gpu --list
+
+3 - opsctl.py: Unified OCI operations controller
+    ./opsctl.py bastion list-sessions
+    ./opsctl.py secrets get my-secret
+    ./opsctl.py patch list-available
+
+
+================================================================================
+ORACLE CLOUD TOOLS (scripts/aftercloud/)
+================================================================================
+
+4 - orcvm.py: VM management (list, create, start, stop, images, shapes)
+    orcvm.py list
+    orcvm.py start ocid1.instance.oc1...
+    orcvm.py images --os "Canonical Ubuntu"
+
+5 - orccont.py: Container and Kubernetes (OKE) management
+    orccont.py clusters
+    orccont.py containers
+    orccont.py create --config container.json
+
+6 - blockutil.py: Block storage volumes and backups
+    blockutil.py list
+    blockutil.py attach <volume-id> <instance-id>
+    blockutil.py backup <volume-id>
+
+7 - orckms.py: Vault and secrets management (KMS)
+    orckms.py vaults
+    orckms.py secrets
+    orckms.py secret <secret-id> --show-value
+
+8 - generate_terraform.py: Export OCI resources to Terraform HCL
+    generate_terraform.py --output ./terraform
+    generate_terraform.py --resources compute,network --output ./tf
+
+9 - generate_ansible.py: Generate Ansible inventory and playbooks from OCI
+    generate_ansible.py --output ./ansible
+    generate_ansible.py --inventory --output ./ansible
+
+10 - cloudtop.py: Multi-cloud resource monitor (Python version)
+     cloudtop.py --all
+     cloudtop.py --oracle --running
+     cloudtop.py --refresh 30
+
+11 - mkocicmd.py: Interactive OCI CLI command generator
+     mkocicmd.py
+     mkocicmd.py compute
+     mkocicmd.py storage
+
+12 - ticketutil.py: Change ticket system client (changes.afterdarksys.com)
+     ticketutil.py configure
+     ticketutil.py list
+     ticketutil.py create --config ticket.json
+
+13 - oci_free_instance.py: Free tier instance retry (keeps trying until available)
+     oci_free_instance.py --config config.json
+     oci_free_instance.py --regions
+     oci_free_instance.py --shapes
+
+
+================================================================================
+PYTHON OPERATIONS SCRIPTS (scripts/python/)
+================================================================================
+
+14 - bastion.py: OCI Bastion session management
+     python bastion.py list-sessions
+     python bastion.py create-session --target-ip 10.0.1.5
+
+15 - parameter_store.py: OCI Vault secrets management
+     python parameter_store.py get my-secret
+     python parameter_store.py set my-secret "value"
+     python parameter_store.py list
+
+16 - patch_management.py: OCI OS patch management
+     python patch_management.py list-available
+     python patch_management.py apply-updates
+
+17 - jump_host.py: Jump host access management
+     python jump_host.py connect prod-jump
+     python jump_host.py list
+
+18 - backend_sessions.py: Backend service connections
+     python backend_sessions.py list
+     python backend_sessions.py connect db-prod
+
+19 - osm_session.py: OS Management session operations
+     python osm_session.py list
+     python osm_session.py create
+
+20 - test_central_auth.py: Central authentication testing utility
+     python test_central_auth.py --url https://auth.example.com
+
+
+================================================================================
+SYNC & MIGRATION TOOLS (tools/)
+================================================================================
+
+21 - md-ticket-sync.py: Sync markdown tickets to Changes system
+     python md-ticket-sync.py --scan-dir ./tickets
+     python md-ticket-sync.py --list-pending
+     python md-ticket-sync.py --sync-all --submit
+
+
+================================================================================
+SETUP
+================================================================================
+
+AfterCloud tools:
+    cd scripts/aftercloud && ./setup.sh
+
+Python scripts:
+    pip install -r requirements.txt
+
+Changes CLI:
+    Already compiled at ./changes
+
+
+================================================================================
+HELP
+================================================================================
+
+All tools support --help for detailed usage.
+Changes CLI: changes --help, changes <command> --help

@@ -27,8 +27,16 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
 
-# Configuration file location
-CONFIG_PATH = Path.home() / ".cloudtop.json"
+# Import centralized config
+try:
+    from adsops_config import get_config, Config
+except ImportError:
+    # Fallback if not installed
+    get_config = None
+    Config = None
+
+# Legacy config path (deprecated - use ~/.adsops_config/config.json)
+LEGACY_CONFIG_PATH = Path.home() / ".cloudtop.json"
 
 
 def speak(message: str):
@@ -401,55 +409,76 @@ class RunPodProvider(Provider):
 
 
 def load_config() -> dict:
-    """Load configuration from file."""
-    if CONFIG_PATH.exists():
-        with open(CONFIG_PATH) as f:
+    """Load configuration from centralized config or legacy file."""
+    # Try centralized config first
+    if get_config is not None:
+        cfg = get_config()
+        if cfg.exists():
+            # Build provider config from centralized config
+            return {
+                "providers": {
+                    "oracle": {
+                        "enabled": True,
+                        "profile": cfg.get("oci", "profile", "DEFAULT"),
+                        "compartment_id": cfg.get("oci", "compartment_id", "")
+                    },
+                    "cloudflare": {
+                        "enabled": bool(cfg.get("cloudflare", "api_token")),
+                        "api_token": cfg.get("cloudflare", "api_token", ""),
+                        "account_id": cfg.get("cloudflare", "account_id", "")
+                    },
+                    "neon": {
+                        "enabled": bool(cfg.get("neon", "api_key")),
+                        "api_key": cfg.get("neon", "api_key", "")
+                    },
+                    "vastai": {
+                        "enabled": bool(cfg.get("vastai", "api_key")),
+                        "api_key": cfg.get("vastai", "api_key", "")
+                    },
+                    "runpod": {
+                        "enabled": bool(cfg.get("runpod", "api_key")),
+                        "api_key": cfg.get("runpod", "api_key", "")
+                    }
+                }
+            }
+
+    # Fall back to legacy config
+    if LEGACY_CONFIG_PATH.exists():
+        with open(LEGACY_CONFIG_PATH) as f:
             return json.load(f)
     return {}
 
 
 def save_sample_config():
-    """Save sample configuration file."""
-    sample = {
-        "_comment": "cloudtop configuration file",
-        "providers": {
-            "oracle": {
-                "enabled": True,
-                "profile": "DEFAULT",
-                "compartment_id": ""
-            },
-            "cloudflare": {
-                "enabled": False,
-                "api_token": "",
-                "account_id": ""
-            },
-            "neon": {
-                "enabled": False,
-                "api_key": ""
-            },
-            "vastai": {
-                "enabled": False,
-                "api_key": ""
-            },
-            "runpod": {
-                "enabled": False,
-                "api_key": ""
+    """Initialize centralized config file."""
+    if get_config is not None:
+        cfg = get_config()
+        if cfg.init():
+            speak_plain(f"Configuration file created: {cfg.config_path}")
+        else:
+            speak_plain(f"Configuration already exists: {cfg.config_path}")
+        speak_plain("")
+        speak_plain("Edit with: adsops_config.py set <section>.<key> <value>")
+        speak_plain("Or edit directly: ~/.adsops_config/config.json")
+        speak_plain("")
+        speak_plain("Environment variables also work:")
+        speak_plain("  ADSOPS_CLOUDFLARE_API_TOKEN, ADSOPS_NEON_API_KEY, etc.")
+    else:
+        # Fallback to legacy config
+        sample = {
+            "_comment": "cloudtop configuration - DEPRECATED: use ~/.adsops_config/config.json",
+            "providers": {
+                "oracle": {"enabled": True, "profile": "DEFAULT", "compartment_id": ""},
+                "cloudflare": {"enabled": False, "api_token": "", "account_id": ""},
+                "neon": {"enabled": False, "api_key": ""},
+                "vastai": {"enabled": False, "api_key": ""},
+                "runpod": {"enabled": False, "api_key": ""}
             }
-        },
-        "defaults": {
-            "output_format": "table",
-            "show_all": True
         }
-    }
-
-    with open(CONFIG_PATH, "w") as f:
-        json.dump(sample, f, indent=2)
-
-    speak_plain(f"Configuration file created: {CONFIG_PATH}")
-    speak_plain("")
-    speak_plain("Edit this file to configure your cloud providers.")
-    speak_plain("You can also use environment variables:")
-    speak_plain("  CLOUDFLARE_API_TOKEN, NEON_API_KEY, VASTAI_API_KEY, RUNPOD_API_KEY")
+        with open(LEGACY_CONFIG_PATH, "w") as f:
+            json.dump(sample, f, indent=2)
+        speak_plain(f"Legacy config created: {LEGACY_CONFIG_PATH}")
+        speak_plain("Note: Consider using adsops_config.py for centralized config")
 
 
 def format_table(resources: List[Resource], wide: bool = False):

@@ -130,6 +130,7 @@ make_executable() {
     log "Making scripts executable..."
 
     local scripts=(
+        "adsops_config.py"
         "orcvm.py"
         "orccont.py"
         "generate_terraform.py"
@@ -170,6 +171,7 @@ create_symlinks() {
     fi
 
     local scripts=(
+        "adsops-config:adsops_config.py"
         "orcvm:orcvm.py"
         "orccont:orccont.py"
         "generate-terraform:generate_terraform.py"
@@ -206,6 +208,7 @@ print_usage() {
     log_plain "=" * 50
     log_plain ""
     log_plain "Available commands:"
+    log_plain "  adsops-config    - Manage API keys and credentials"
     log_plain "  orcvm            - VM management"
     log_plain "  orccont          - Container management"
     log_plain "  blockutil        - Block storage"
@@ -218,9 +221,10 @@ print_usage() {
     log_plain "  oci-free-instance - Free tier instance retry"
     log_plain ""
     log_plain "Quick start:"
-    log_plain "  1. Configure OCI: oci setup config"
-    log_plain "  2. List VMs: orcvm list"
-    log_plain "  3. Get help: orcvm --help"
+    log_plain "  1. Initialize config: adsops-config init"
+    log_plain "  2. Configure OCI: oci setup config"
+    log_plain "  3. Set API keys: adsops-config set cloudflare.api_token XXX"
+    log_plain "  4. List VMs: orcvm list"
     log_plain ""
     log_plain "For screen reader users:"
     log_plain "  All commands output plain text with timestamps."

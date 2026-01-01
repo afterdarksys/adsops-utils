@@ -32,12 +32,18 @@ except ImportError:
     print("Install with: pip install requests")
     sys.exit(1)
 
+# Import centralized config
+try:
+    from adsops_config import get_config
+except ImportError:
+    get_config = None
+
 
 # Default API base URL
 DEFAULT_API_URL = "https://changes.afterdarksys.com"
 
-# Config file location
-CONFIG_PATH = Path.home() / ".config" / "ticketutil" / "config.json"
+# Legacy config file location (deprecated - use ~/.adsops_config/config.json)
+LEGACY_CONFIG_PATH = Path.home() / ".config" / "ticketutil" / "config.json"
 
 
 def speak(message: str):
@@ -54,15 +60,35 @@ def speak_plain(message: str):
 
 
 def load_config() -> dict:
-    """Load configuration from file or environment."""
+    """Load configuration from centralized config, env, or legacy file."""
     config = {
-        "api_url": os.environ.get("TICKETUTIL_API_URL", DEFAULT_API_URL),
-        "api_token": os.environ.get("TICKETUTIL_API_TOKEN"),
-        "org_id": os.environ.get("TICKETUTIL_ORG_ID"),
+        "api_url": DEFAULT_API_URL,
+        "api_token": None,
+        "org_id": None,
     }
 
-    if CONFIG_PATH.exists():
-        with open(CONFIG_PATH) as f:
+    # Try centralized config first
+    if get_config is not None:
+        cfg = get_config()
+        if cfg.exists():
+            config["api_url"] = cfg.get("ticketing", "api_url", DEFAULT_API_URL)
+            config["api_token"] = cfg.get("ticketing", "api_token")
+            config["org_id"] = cfg.get("ticketing", "org_id")
+
+    # Environment variables override config file
+    if os.environ.get("TICKETUTIL_API_URL"):
+        config["api_url"] = os.environ.get("TICKETUTIL_API_URL")
+    if os.environ.get("TICKETUTIL_API_TOKEN"):
+        config["api_token"] = os.environ.get("TICKETUTIL_API_TOKEN")
+    if os.environ.get("TICKETUTIL_ORG_ID"):
+        config["org_id"] = os.environ.get("TICKETUTIL_ORG_ID")
+    # Also support ADSOPS_ prefix
+    if os.environ.get("ADSOPS_TICKETING_API_TOKEN"):
+        config["api_token"] = os.environ.get("ADSOPS_TICKETING_API_TOKEN")
+
+    # Fall back to legacy config if no token found
+    if not config["api_token"] and LEGACY_CONFIG_PATH.exists():
+        with open(LEGACY_CONFIG_PATH) as f:
             file_config = json.load(f)
             config.update(file_config)
 
@@ -70,12 +96,20 @@ def load_config() -> dict:
 
 
 def save_config(config: dict):
-    """Save configuration to file."""
-    CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
-    with open(CONFIG_PATH, "w") as f:
-        json.dump(config, f, indent=2)
-    # Set restrictive permissions
-    CONFIG_PATH.chmod(0o600)
+    """Save configuration to centralized config."""
+    if get_config is not None:
+        cfg = get_config()
+        cfg.set("ticketing", "api_url", config.get("api_url", DEFAULT_API_URL))
+        if config.get("api_token"):
+            cfg.set("ticketing", "api_token", config["api_token"])
+        if config.get("org_id"):
+            cfg.set("ticketing", "org_id", config["org_id"])
+    else:
+        # Fall back to legacy config
+        LEGACY_CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
+        with open(LEGACY_CONFIG_PATH, "w") as f:
+            json.dump(config, f, indent=2)
+        LEGACY_CONFIG_PATH.chmod(0o600)
 
 
 def get_api_client(config: dict):
