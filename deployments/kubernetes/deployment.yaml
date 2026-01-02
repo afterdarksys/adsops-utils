@@ -3,16 +3,23 @@ kind: Namespace
 metadata:
   name: changes
 ---
-apiVersion: v1
-kind: Secret
-metadata:
-  name: changes-secrets
-  namespace: changes
-type: Opaque
-stringData:
-  jwt-secret: "afterdark-entertainment-systems-2024"
-  db-host: "ep-icy-lab-a4y02aid-pooler.us-east-1.aws.neon.tech"
-  db-password: "npg_gmURiN7l2hqr"
+# SECRETS CONFIGURATION
+#
+# Secrets are stored in OCI Vault and should NOT be hardcoded here.
+# Vault secret names:
+#   - adsops-jwt-secret (JWT signing key)
+#   - adsops-neon-db-host (Neon database host)
+#   - adsops-neon-db-password (Neon database password)
+#
+# To deploy secrets:
+# 1. Copy secrets.yaml.example to secrets.yaml
+# 2. Replace placeholder values with actual secrets from OCI Vault
+# 3. Apply: kubectl apply -f secrets.yaml
+# 4. Then apply this deployment
+#
+# Note: secrets.yaml is gitignored and should never be committed
+#
+# For production, consider using External Secrets Operator to sync from OCI Vault automatically
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -35,7 +42,7 @@ spec:
       - name: oci-registry
       containers:
       - name: changes-api
-        image: us-ashburn-1.ocir.io/idd2oizp8xvc/changes-api:v1.1.0
+        image: us-ashburn-1.ocir.io/idd2oizp8xvc/changes-api:v1.3.3
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
@@ -66,7 +73,7 @@ spec:
         - name: ADSOPS_DATABASE_SSLMODE
           value: "require"
         - name: ADSOPS_DATABASE_SCHEMA
-          value: "changes"
+          value: "public"
         - name: ADSOPS_JWT_SECRET_KEY
           valueFrom:
             secretKeyRef:
