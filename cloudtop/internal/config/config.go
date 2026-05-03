@@ -10,11 +10,50 @@ import (
 
 // Config represents the root cloudtop configuration
 type Config struct {
-	Version   string              `json:"version"`
-	Providers map[string]Provider `json:"providers"`
-	Defaults  Defaults            `json:"defaults"`
-	Output    OutputConfig        `json:"output"`
-	Cache     CacheConfig         `json:"cache"`
+	Version        string              `json:"version"`
+	Providers      map[string]Provider `json:"providers"`
+	BaremetalHosts []BaremetalHost     `json:"baremetal_hosts,omitempty"`
+	Defaults       Defaults            `json:"defaults"`
+	Output         OutputConfig        `json:"output"`
+	Cache          CacheConfig         `json:"cache"`
+	Server         ServerConfig        `json:"server,omitempty"`
+}
+
+// BaremetalHost configures a bare metal or dedicated VM host to monitor
+type BaremetalHost struct {
+	Name    string            `json:"name"`
+	Host    string            `json:"host,omitempty"`    // empty = localhost
+	SSHPort int               `json:"ssh_port,omitempty"` // 0 = local collection
+	SSHUser string            `json:"ssh_user,omitempty"`
+	SSHKey  string            `json:"ssh_key,omitempty"`
+	Labels  map[string]string `json:"labels,omitempty"`
+	Enabled bool              `json:"enabled"`
+}
+
+// ServerConfig controls the metrics server daemon
+type ServerConfig struct {
+	Enabled         bool         `json:"enabled"`
+	Host            string       `json:"host"`            // bind address, default "0.0.0.0"
+	Port            int          `json:"port"`            // default 9090
+	RefreshInterval Duration     `json:"refresh_interval"` // how often to re-collect
+	Auth            ServerAuth   `json:"auth,omitempty"`
+	Export          ExportConfig `json:"export"`
+}
+
+// ServerAuth optionally gates the metrics endpoints behind a bearer token
+type ServerAuth struct {
+	Enabled bool   `json:"enabled"`
+	Token   string `json:"token"`
+}
+
+// ExportConfig controls what the server exposes
+type ExportConfig struct {
+	// Format controls the /metrics endpoint: "prometheus", "json", or "both"
+	Format string `json:"format"`
+	// JSONPath is the URL path for the JSON snapshot endpoint (default "/api/v1/snapshot")
+	JSONPath string `json:"json_path,omitempty"`
+	// PromPath is the URL path for the Prometheus endpoint (default "/metrics")
+	PromPath string `json:"prom_path,omitempty"`
 }
 
 // Provider represents a single provider configuration
@@ -211,6 +250,17 @@ func DefaultConfig() *Config {
 			TTL:     Duration(5 * time.Minute),
 			MaxSize: 1000,
 		},
+		Server: ServerConfig{
+			Enabled:         false,
+			Host:            "0.0.0.0",
+			Port:            9090,
+			RefreshInterval: Duration(30 * time.Second),
+			Export: ExportConfig{
+				Format:   "both",
+				JSONPath: "/api/v1/snapshot",
+				PromPath: "/metrics",
+			},
+		},
 		Providers: make(map[string]Provider),
 	}
 }
@@ -237,6 +287,28 @@ func GenerateSampleConfig() *Config {
 			Backend: "memory",
 			TTL:     Duration(5 * time.Minute),
 			MaxSize: 1000,
+		},
+		Server: ServerConfig{
+			Enabled:         false,
+			Host:            "0.0.0.0",
+			Port:            9090,
+			RefreshInterval: Duration(30 * time.Second),
+			Auth: ServerAuth{
+				Enabled: false,
+				Token:   "",
+			},
+			Export: ExportConfig{
+				Format:   "both",
+				JSONPath: "/api/v1/snapshot",
+				PromPath: "/metrics",
+			},
+		},
+		BaremetalHosts: []BaremetalHost{
+			{
+				Name:    "local",
+				Enabled: true,
+				Labels:  map[string]string{"role": "server", "env": "prod"},
+			},
 		},
 		Providers: map[string]Provider{
 			"cloudflare": {

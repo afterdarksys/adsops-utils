@@ -16,9 +16,11 @@ import (
 	"github.com/afterdarksys/cloudtop/internal/config"
 	"github.com/afterdarksys/cloudtop/internal/output"
 	"github.com/afterdarksys/cloudtop/internal/provider"
+	"github.com/afterdarksys/cloudtop/internal/server"
 
 	// Import all providers to register them
 	_ "github.com/afterdarksys/cloudtop/internal/provider/azure"
+	_ "github.com/afterdarksys/cloudtop/internal/provider/baremetal"
 	_ "github.com/afterdarksys/cloudtop/internal/provider/cloudflare"
 	_ "github.com/afterdarksys/cloudtop/internal/provider/gcp"
 	_ "github.com/afterdarksys/cloudtop/internal/provider/neon"
@@ -59,6 +61,13 @@ var (
 
 	// Other flags
 	flagRefresh time.Duration
+
+	// Serve flags
+	flagServePort    int
+	flagServeHost    string
+	flagServeToken   string
+	flagServeFormat  string
+	flagServeRefresh time.Duration
 )
 
 func main() {
@@ -139,6 +148,133 @@ var providersCmd = &cobra.Command{
 	},
 }
 
+var serveCmd = &cobra.Command{
+	Use:   "serve",
+	Short: "Run cloudtop as a metrics server",
+	Long: `Start the cloudtop metrics daemon.
+
+The server collects metrics from all configured providers on a regular interval
+and exposes them over HTTP in two formats:
+
+  Prometheus text format  (default: /metrics)
+  JSON snapshot           (default: /api/v1/snapshot)
+
+Examples:
+  # Start server with defaults from cloudtop.json
+  cloudtop serve
+
+  # Listen on a specific port and refresh every minute
+  cloudtop serve --port 9091 --refresh 1m
+
+  # Prometheus-only output with bearer token auth
+  cloudtop serve --format prometheus --token my-secret
+
+  # JSON-only, bind to localhost only
+  cloudtop serve --host 127.0.0.1 --format json`,
+	RunE: runServe,
+}
+
+func runServe(cmd *cobra.Command, args []string) error {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		<-sigCh
+		fmt.Println("\nShutting down...")
+		cancel()
+	}()
+
+	// Apply CLI flag overrides to the server config
+	srvCfg := &cfg.Server
+	if flagServePort > 0 {
+		srvCfg.Port = flagServePort
+	}
+	if flagServeHost != "" {
+		srvCfg.Host = flagServeHost
+	}
+	if flagServeToken != "" {
+		srvCfg.Auth.Enabled = true
+		srvCfg.Auth.Token = flagServeToken
+	}
+	if flagServeFormat != "" {
+		srvCfg.Export.Format = flagServeFormat
+	}
+	if flagServeRefresh > 0 {
+		srvCfg.RefreshInterval = config.Duration(flagServeRefresh)
+	}
+
+	// Apply port/refresh defaults if still zero after config load
+	if srvCfg.Port == 0 {
+		srvCfg.Port = 9090
+	}
+	if srvCfg.RefreshInterval == 0 {
+		srvCfg.RefreshInterval = config.Duration(30 * time.Second)
+	}
+	if srvCfg.Export.Format == "" {
+		srvCfg.Export.Format = "both"
+	}
+
+	// Determine which providers to initialise — use all enabled ones plus baremetal
+	providerNames := cfg.GetEnabledProviders()
+	// Inject baremetal hosts from config as a provider option
+	if len(cfg.BaremetalHosts) > 0 {
+		providerNames = appendIfMissing(providerNames, "baremetal")
+		injectBaremetalHosts(cfg)
+	}
+
+	providers, err := initializeProviders(ctx, providerNames)
+	if err != nil {
+		return fmt.Errorf("failed to initialize providers: %w", err)
+	}
+	defer closeProviders(providers)
+
+	if len(providers) == 0 {
+		fmt.Println("Warning: no providers initialised. Serving empty metrics.")
+	}
+
+	srv := server.New(cfg, providers)
+	return srv.Start(ctx)
+}
+
+// appendIfMissing adds s to slice if not already present.
+func appendIfMissing(slice []string, s string) []string {
+	for _, v := range slice {
+		if v == s {
+			return slice
+		}
+	}
+	return append(slice, s)
+}
+
+// injectBaremetalHosts wires the BaremetalHosts config into the baremetal provider options.
+func injectBaremetalHosts(c *config.Config) {
+	if _, exists := c.Providers["baremetal"]; !exists {
+		c.Providers["baremetal"] = config.Provider{Enabled: true}
+	}
+	p := c.Providers["baremetal"]
+	if p.Options == nil {
+		p.Options = make(map[string]interface{})
+	}
+	hosts := make([]interface{}, 0, len(c.BaremetalHosts))
+	for _, h := range c.BaremetalHosts {
+		if !h.Enabled {
+			continue
+		}
+		entry := map[string]interface{}{
+			"name":   h.Name,
+			"labels": h.Labels,
+		}
+		if h.Host != "" {
+			entry["host"] = h.Host
+		}
+		hosts = append(hosts, entry)
+	}
+	p.Options["hosts"] = hosts
+	c.Providers["baremetal"] = p
+}
+
 func init() {
 	cobra.OnInitialize(initConfig)
 
@@ -174,9 +310,17 @@ func init() {
 	// Other flags
 	rootCmd.Flags().DurationVar(&flagRefresh, "refresh", 0, "Auto-refresh interval (e.g., 30s, 1m)")
 
+	// Serve subcommand flags
+	serveCmd.Flags().IntVar(&flagServePort, "port", 0, "Port to listen on (overrides config, default 9090)")
+	serveCmd.Flags().StringVar(&flagServeHost, "host", "", "Bind address (overrides config, default 0.0.0.0)")
+	serveCmd.Flags().StringVar(&flagServeToken, "token", "", "Bearer token for auth (empty = no auth)")
+	serveCmd.Flags().StringVar(&flagServeFormat, "format", "", "Export format: prometheus, json, or both (overrides config)")
+	serveCmd.Flags().DurationVar(&flagServeRefresh, "refresh", 0, "Collection refresh interval (overrides config, e.g. 30s)")
+
 	// Add subcommands
 	rootCmd.AddCommand(initConfigCmd)
 	rootCmd.AddCommand(providersCmd)
+	rootCmd.AddCommand(serveCmd)
 }
 
 func initConfig() {

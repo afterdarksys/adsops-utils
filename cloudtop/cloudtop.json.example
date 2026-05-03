@@ -1,5 +1,31 @@
 {
   "version": "1.0",
+  "server": {
+    "enabled": false,
+    "host": "0.0.0.0",
+    "port": 9090,
+    "refresh_interval": "30s",
+    "auth": {
+      "enabled": false,
+      "token": ""
+    },
+    "export": {
+      "format": "both",
+      "prom_path": "/metrics",
+      "json_path": "/api/v1/snapshot"
+    }
+  },
+  "baremetal_hosts": [
+    {
+      "name": "web-01",
+      "enabled": true,
+      "labels": {
+        "role": "web",
+        "env": "prod",
+        "datacenter": "us-east"
+      }
+    }
+  ],
   "defaults": {
     "refresh_interval": "30s",
     "output_format": "table",

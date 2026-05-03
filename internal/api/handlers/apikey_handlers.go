@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -178,7 +179,7 @@ func (h *APIKeyHandler) ListAPIKeys(c *gin.Context) {
 		var id string
 
 		err := rows.Scan(
-			&id, &key.Name, &key.KeyPrefix, (*StringArray)(&scopes),
+			&id, &key.Name, &key.KeyPrefix, pq.Array(&scopes),
 			&key.CreatedAt, &key.ExpiresAt, &key.LastUsedAt,
 			&key.UsageCount, &key.IsActive,
 		)
