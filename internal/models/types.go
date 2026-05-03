@@ -1,5 +1,7 @@
 package models
 
+import "github.com/google/uuid"
+
 // IndustryType represents supported industries
 type IndustryType string
 
@@ -202,4 +204,29 @@ func (u UserRole) Valid() bool {
 		return true
 	}
 	return false
+}
+
+// PrincipalType identifies whether an actor is a human user, AI agent, or service
+type PrincipalType string
+
+const (
+	PrincipalTypeUser    PrincipalType = "user"
+	PrincipalTypeAgent   PrincipalType = "agent"
+	PrincipalTypeService PrincipalType = "service"
+)
+
+// Valid returns true if the principal type is valid
+func (p PrincipalType) Valid() bool {
+	switch p {
+	case PrincipalTypeUser, PrincipalTypeAgent, PrincipalTypeService:
+		return true
+	}
+	return false
+}
+
+// Principal represents a resolved actor — user, agent, or service
+type Principal struct {
+	ID   uuid.UUID     `json:"id"`
+	Type PrincipalType `json:"type"`
+	Name string        `json:"name"`
 }

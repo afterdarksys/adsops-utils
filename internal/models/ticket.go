@@ -14,6 +14,7 @@ type Ticket struct {
 	TicketNumber                 string                `db:"ticket_number" json:"ticket_number"`
 	CreatedBy                    uuid.UUID             `db:"created_by" json:"created_by"`
 	AssignedTo                   *uuid.UUID            `db:"assigned_to" json:"assigned_to,omitempty"`
+	AssignedToType               *PrincipalType        `db:"assigned_to_type" json:"assigned_to_type,omitempty"`
 	Title                        string                `db:"title" json:"title"`
 	Description                  string                `db:"description" json:"description"`
 	Status                       TicketStatus          `db:"status" json:"status"`
