@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package adsops.v1;
+
+import "google/protobuf/timestamp.proto";
+
+message ContainerStats {
+  string id = 1;
+  string name = 2;
+  string image = 3;
+  string state = 4;
+  double cpu_pct = 5;
+  int64 mem_used_bytes = 6;
+  int64 mem_limit_bytes = 7;
+  double mem_pct = 8;
+  double rx_bytes_per_sec = 9;
+  double tx_bytes_per_sec = 10;
+  int32 restart_count = 11;
+}
+
+message DockerStats {
+  google.protobuf.Timestamp timestamp = 1;
+  bool available = 2;
+  int32 total_containers = 3;
+  int32 running_containers = 4;
+  repeated ContainerStats containers = 5;
+}
