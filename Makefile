@@ -1,6 +1,6 @@
 # After Dark Systems Change Management - Makefile
 
-.PHONY: all build clean test lint run-api run-cli migrate help
+.PHONY: all build clean test lint run-api run-cli migrate help proto-gen proto-lint proto-breaking
 
 # Go parameters
 GOCMD=go
@@ -120,3 +120,16 @@ help:
 	@echo ""
 	@echo "Targets:"
 	@sed -n 's/^##//p' $(MAKEFILE_LIST) | column -t -s ':' | sed -e 's/^/ /'
+
+## proto-gen: Generate Go and Python bindings from .proto files
+proto-gen:
+	buf generate
+	find gen/python -type d -exec touch {}/__init__.py \;
+
+## proto-lint: Lint .proto files
+proto-lint:
+	buf lint proto/
+
+## proto-breaking: Check for breaking changes against main
+proto-breaking:
+	buf breaking proto/ --against '.git#branch=main'
