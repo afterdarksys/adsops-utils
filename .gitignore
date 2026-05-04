@@ -78,8 +78,7 @@ tmp/
 debug
 __debug_bin
 
-# Go workspace files
-go.work
+# Go workspace files (go.work is committed — needed for gen/go multi-module)
 go.work.sum
 tools/blackout/blackout-linux
 tools/hostctl/hostctl-linux
