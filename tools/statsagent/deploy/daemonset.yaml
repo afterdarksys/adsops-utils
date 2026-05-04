@@ -1,0 +1,181 @@
+# statsagent DaemonSet — runs one pod on every node in the k3s cluster.
+# Each pod collects host-level metrics (hostPID + hostNetwork) plus
+# Docker container stats and local k3s API metrics.
+#
+# Apply:
+#   kubectl apply -f daemonset.yaml
+#   kubectl -n monitoring get ds statsagent
+#
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: statsagent
+  namespace: monitoring
+  labels:
+    app: statsagent
+spec:
+  selector:
+    matchLabels:
+      app: statsagent
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: statsagent
+      annotations:
+        # Tell Prometheus to scrape this pod
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9100"
+        prometheus.io/path: "/metrics"
+    spec:
+      # Use host PID and network namespaces for accurate host-level metrics
+      hostPID: true
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+
+      # Tolerate all taints so we run on control-plane nodes too
+      tolerations:
+        - operator: Exists
+
+      containers:
+        - name: statsagent
+          image: afterdarksys/statsagent:latest
+          imagePullPolicy: IfNotPresent
+          args: ["serve"]
+          ports:
+            - name: metrics
+              containerPort: 9100
+              hostPort: 9100
+              protocol: TCP
+          env:
+            - name: STATSAGENT_PORT
+              value: "9100"
+            - name: STATSAGENT_INTERVAL
+              value: "15s"
+            - name: STATSAGENT_DOCKER_SOCKET
+              value: /var/run/docker.sock
+            - name: STATSAGENT_K3S_KUBECONFIG
+              value: /etc/rancher/k3s/k3s.yaml
+            # Label each metric with the node name
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: STATSAGENT_LABELS
+              value: "node=$(NODE_NAME)"
+          volumeMounts:
+            # Host /proc for system metrics
+            - name: proc
+              mountPath: /proc
+              readOnly: true
+            # Host /sys for additional device info
+            - name: sys
+              mountPath: /sys
+              readOnly: true
+            # Docker socket for container metrics
+            - name: docker-socket
+              mountPath: /var/run/docker.sock
+              readOnly: true
+            # k3s kubeconfig for cluster metrics
+            - name: k3s-kubeconfig
+              mountPath: /etc/rancher/k3s/k3s.yaml
+              readOnly: true
+          resources:
+            requests:
+              cpu: 20m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 9100
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 9100
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          securityContext:
+            privileged: false
+            readOnlyRootFilesystem: true
+            runAsUser: 0  # root required for /proc access
+
+      volumes:
+        - name: proc
+          hostPath:
+            path: /proc
+        - name: sys
+          hostPath:
+            path: /sys
+        - name: docker-socket
+          hostPath:
+            path: /var/run/docker.sock
+            type: Socket
+        - name: k3s-kubeconfig
+          hostPath:
+            path: /etc/rancher/k3s/k3s.yaml
+            type: FileOrCreate
+
+      serviceAccountName: statsagent
+---
+# ServiceAccount for the DaemonSet
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: statsagent
+  namespace: monitoring
+---
+# ClusterRole to read nodes and pods
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: statsagent
+rules:
+  - apiGroups: [""]
+    resources: ["nodes", "pods", "namespaces"]
+    verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["nodes/metrics", "nodes/stats"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: statsagent
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: statsagent
+subjects:
+  - kind: ServiceAccount
+    name: statsagent
+    namespace: monitoring
+---
+# Service so Prometheus can discover pods via ServiceMonitor
+apiVersion: v1
+kind: Service
+metadata:
+  name: statsagent
+  namespace: monitoring
+  labels:
+    app: statsagent
+spec:
+  selector:
+    app: statsagent
+  ports:
+    - name: metrics
+      port: 9100
+      targetPort: 9100
+  clusterIP: None  # headless — one endpoint per pod

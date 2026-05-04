@@ -1,0 +1,141 @@
+#!/bin/bash
+# aiserve-deploy - Deploy AIServe.Farm website
+# Part of the AfterDark Systems Operations Toolkit
+
+set -e
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Configuration
+PROD_SERVER="129.80.158.147"
+JUMPHOST="132.145.179.230"
+SSH_USER="opc"
+SSH_KEY="$HOME/.ssh/darkapi_key"
+WEB_DIR="/home/opc/aiserve-gpuproxyd/web"
+SERVICE_NAME="aiserve-gpuproxyd"
+
+# Source directory
+SRC_DIR="/Users/ryan/development/aiserve-gpuproxyd"
+
+echo -e "${BLUE}=== AIServe.Farm Deployment Tool ===${NC}\n"
+
+# Check if source files exist
+if [ ! -d "$SRC_DIR/web" ]; then
+    echo -e "${RED}Error: Source directory not found: $SRC_DIR/web${NC}"
+    exit 1
+fi
+
+echo -e "${GREEN}Step 1: Package website files${NC}"
+cd "$SRC_DIR"
+tar -czf /tmp/aiserve-web.tar.gz web/
+echo -e "  Packaged: /tmp/aiserve-web.tar.gz ($(du -h /tmp/aiserve-web.tar.gz | cut -f1))"
+
+echo -e "\n${GREEN}Step 2: Check server accessibility${NC}"
+
+# Try direct connection first
+if timeout 5 ssh -q -i "$SSH_KEY" "$SSH_USER@$PROD_SERVER" "exit" 2>/dev/null; then
+    echo -e "  ${GREEN}✓ Direct SSH access available${NC}"
+    DEPLOY_METHOD="direct"
+    DEPLOY_TARGET="$SSH_USER@$PROD_SERVER"
+else
+    echo -e "  ${YELLOW}⚠ Direct SSH not available, checking jumphost...${NC}"
+
+    # Check jumphost
+    if timeout 5 ssh -q -i "$SSH_KEY" "$SSH_USER@$JUMPHOST" "exit" 2>/dev/null; then
+        echo -e "  ${GREEN}✓ Jumphost access available${NC}"
+
+        # Check if jumphost can reach production
+        if ssh -i "$SSH_KEY" "$SSH_USER@$JUMPHOST" "timeout 3 nc -z $PROD_SERVER 22" 2>/dev/null; then
+            echo -e "  ${GREEN}✓ Production server reachable via jumphost${NC}"
+            DEPLOY_METHOD="jumphost"
+            DEPLOY_TARGET="$SSH_USER@$JUMPHOST"
+        else
+            echo -e "  ${RED}✗ Production server not reachable from jumphost${NC}"
+            echo -e "\n${YELLOW}Alternative deployment methods:${NC}"
+            echo -e "  1. Use Cloudflare Tunnel (recommended)"
+            echo -e "  2. Configure OCI Security List to allow jumphost IP"
+            echo -e "  3. Use OCI Bastion Service"
+            echo -e "\n${BLUE}Run: get-tunnel-helper${NC} for tunnel options"
+            exit 1
+        fi
+    else
+        echo -e "  ${RED}✗ No access method available${NC}"
+        exit 1
+    fi
+fi
+
+echo -e "\n${GREEN}Step 3: Upload files${NC}"
+case "$DEPLOY_METHOD" in
+    "direct")
+        echo -e "  Using direct SSH connection..."
+        scp -i "$SSH_KEY" /tmp/aiserve-web.tar.gz "$DEPLOY_TARGET:/tmp/"
+        ;;
+    "jumphost")
+        echo -e "  Using jumphost relay..."
+        # Upload to jumphost first
+        scp -i "$SSH_KEY" /tmp/aiserve-web.tar.gz "$DEPLOY_TARGET:/tmp/"
+        # Then copy from jumphost to production
+        ssh -i "$SSH_KEY" "$DEPLOY_TARGET" \
+            "scp -i ~/.ssh/id_rsa /tmp/aiserve-web.tar.gz $SSH_USER@$PROD_SERVER:/tmp/"
+        ;;
+esac
+
+echo -e "  ${GREEN}✓ Files uploaded${NC}"
+
+echo -e "\n${GREEN}Step 4: Deploy on server${NC}"
+ssh -i "$SSH_KEY" "$DEPLOY_TARGET" << 'ENDSSH'
+set -e
+
+# Extract files
+cd /tmp
+tar -xzf aiserve-web.tar.gz
+
+# Backup existing files
+if [ -d /home/opc/aiserve-gpuproxyd/web ]; then
+    sudo cp -r /home/opc/aiserve-gpuproxyd/web /home/opc/aiserve-gpuproxyd/web.backup.$(date +%Y%m%d-%H%M%S)
+    echo "  Backup created"
+fi
+
+# Deploy new files
+sudo mkdir -p /home/opc/aiserve-gpuproxyd
+sudo cp -r web /home/opc/aiserve-gpuproxyd/
+sudo chown -R opc:opc /home/opc/aiserve-gpuproxyd/web
+echo "  New files deployed"
+
+# Check if service exists and restart
+if sudo systemctl is-active --quiet aiserve-gpuproxyd; then
+    sudo systemctl restart aiserve-gpuproxyd
+    echo "  Service restarted"
+elif command -v docker &> /dev/null && docker ps | grep -q aiserve; then
+    docker restart $(docker ps -q --filter "name=aiserve")
+    echo "  Docker container restarted"
+else
+    echo "  No service found - manual start may be required"
+fi
+
+# Cleanup
+rm -f /tmp/aiserve-web.tar.gz
+rm -rf /tmp/web
+
+echo "  Deployment complete"
+ENDSSH
+
+echo -e "\n${GREEN}Step 5: Verify deployment${NC}"
+echo -e "  Checking https://aiserve.farm ..."
+if curl -s -o /dev/null -w "%{http_code}" https://aiserve.farm | grep -q "200"; then
+    echo -e "  ${GREEN}✓ Website is responding${NC}"
+else
+    echo -e "  ${YELLOW}⚠ Website may not be accessible yet (DNS propagation or service starting)${NC}"
+fi
+
+# Cleanup local temp file
+rm -f /tmp/aiserve-web.tar.gz
+
+echo -e "\n${BLUE}=== Deployment Complete ===${NC}"
+echo -e "  Visit: ${GREEN}https://aiserve.farm${NC}"
+echo -e "  API: ${GREEN}https://api.aiserve.farm${NC}"

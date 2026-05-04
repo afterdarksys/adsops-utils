@@ -1,0 +1,50 @@
+{
+  "id": "CHG-2026-00009",
+  "title": "BlueBlocks: HIPAA-Compliant P2P Protocol Implementation",
+  "description": "Design and implement secure P2P protocol for HIPAA-compliant healthcare data transfer.\n\n## Protocol Features\n- Zero-knowledge transport (relay nodes cannot decrypt PHI)\n- End-to-end encryption (X25519 key exchange, AES-256-GCM)\n- Onion-style routing through relay network\n- Chunked file transfer for large medical images/video\n- Immutable audit logging on-chain\n\n## Cryptographic Stack\n- Key Exchange: X25519 (Curve25519 ECDH)\n- Symmetric Encryption: AES-256-GCM\n- Signing: Ed25519\n- Key Derivation: Argon2id\n- Hashing: BLAKE3\n\n## HIPAA Technical Safeguards\n- Access Control (§164.312(a)(1)) - Patient-controlled keys, smart contract ACL\n- Audit Controls (§164.312(b)) - Immutable on-chain audit log\n- Integrity (§164.312(c)(1)) - BLAKE3 hashing, Ed25519 signatures\n- Transmission Security (§164.312(e)(1)) - TLS 1.3 + E2E encryption\n- Encryption (§164.312(a)(2)(iv)) - AES-256-GCM at rest and in transit\n\n## Files Created\ndocs/P2P_PROTOCOL_SPECIFICATION.md\npreapproved-implementations/lib/p2p/types.go\npreapproved-implementations/lib/p2p/encryption/envelope.go\npreapproved-implementations/lib/p2p/transport/websocket.go\n\nParent: CHG-2026-00007",
+  "status": "submitted",
+  "priority": "high",
+  "risk": "medium",
+  "type": "",
+  "industry": "healthcare",
+  "compliance_frameworks": [
+    "hipaa"
+  ],
+  "affected_systems": [
+    "BlueBlocks P2P Network",
+    "Healthcare Data Platform"
+  ],
+  "acceptance_criteria": [],
+  "testing_plan": "",
+  "rollback_plan": "",
+  "created_by": "ryan@afterdarksys.com",
+  "created_at": "2026-01-17T00:25:41Z",
+  "updated_at": "2026-01-17T00:25:41Z",
+  "sprint": "2026-Q1-Sprint-1",
+  "assignee": null,
+  "approvals_required": [
+    "it",
+    "security"
+  ],
+  "approvals": [],
+  "dependencies": [],
+  "comments": [
+    {
+      "author": "ryan@afterdarksys.com",
+      "timestamp": "2026-01-17T00:25:41Z",
+      "text": "Ticket created via CLI."
+    }
+  ],
+  "visibility": {
+    "restricted": true,
+    "allowed_users": [
+      "claude@afterdarksys.com",
+      "rams@afterdarksys.com",
+      "ryan@afterdarksys.com"
+    ],
+    "allowed_roles": [
+      "management"
+    ],
+    "reason": "BlueBlocks infrastructure planning - restricted to management team"
+  }
+}

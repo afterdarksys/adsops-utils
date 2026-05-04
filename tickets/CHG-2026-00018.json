@@ -1,0 +1,49 @@
+{
+  "id": "CHG-2026-00018",
+  "title": "BlueBlocks: Kubernetes Production Manifests",
+  "description": "Create Kubernetes manifests for production-grade deployment.\n\n## Requirements\n\n### Core Components\n- StatefulSets for validators (persistent identity)\n- Deployments for stateless nodes\n- PersistentVolumeClaims for blockchain data\n- ConfigMaps and Secrets management\n\n### Networking\n- Services (ClusterIP, LoadBalancer)\n- Ingress with TLS termination\n- NetworkPolicies for isolation\n- Service mesh consideration (Istio/Linkerd)\n\n### Scaling\n- Horizontal Pod Autoscaler for nodes\n- Vertical Pod Autoscaler for resource optimization\n- Pod Disruption Budgets for updates\n\n### Monitoring\n- ServiceMonitor for Prometheus\n- Grafana dashboard ConfigMaps\n- Alerting rules\n\n### Files to Create\nkubernetes/\n├── base/\n│   ├── namespace.yaml\n│   ├── configmap.yaml\n│   ├── secrets.yaml\n│   ├── node-deployment.yaml\n│   ├── validator-statefulset.yaml\n│   ├── miner-deployment.yaml\n│   ├── service.yaml\n│   └── networkpolicy.yaml\n├── overlays/\n│   ├── devnet/\n│   ├── testnet/\n│   └── mainnet/\n└── kustomization.yaml\n\n## Identified In\nTeam meeting 2026-01-16 - Jordan Blake (Cloud)\n\nParent: CHG-2026-00007",
+  "status": "submitted",
+  "priority": "high",
+  "risk": "medium",
+  "type": "",
+  "industry": "healthcare",
+  "compliance_frameworks": [
+    "hipaa"
+  ],
+  "affected_systems": [
+    "BlueBlocks Kubernetes"
+  ],
+  "acceptance_criteria": [],
+  "testing_plan": "",
+  "rollback_plan": "",
+  "created_by": "ryan@afterdarksys.com",
+  "created_at": "2026-01-17T00:34:10Z",
+  "updated_at": "2026-01-17T00:34:10Z",
+  "sprint": "2026-Q1-Sprint-1",
+  "assignee": null,
+  "approvals_required": [
+    "it",
+    "operations"
+  ],
+  "approvals": [],
+  "dependencies": [],
+  "comments": [
+    {
+      "author": "ryan@afterdarksys.com",
+      "timestamp": "2026-01-17T00:34:10Z",
+      "text": "Ticket created via CLI."
+    }
+  ],
+  "visibility": {
+    "restricted": true,
+    "allowed_users": [
+      "claude@afterdarksys.com",
+      "rams@afterdarksys.com",
+      "ryan@afterdarksys.com"
+    ],
+    "allowed_roles": [
+      "management"
+    ],
+    "reason": "BlueBlocks infrastructure planning - restricted to management team"
+  }
+}

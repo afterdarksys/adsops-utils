@@ -1,0 +1,46 @@
+{
+  "id": "CHG-2026-00013",
+  "title": "BlueBlocks: Deployment Scripts & Configuration",
+  "description": "Create deployment automation scripts and configuration files.\n\n## Shell Scripts\n- deploy-devnet.sh - Start/stop/status for local development network\n- deploy-testnet.sh - Multi-node testnet management with health checks\n- Makefile - Convenience commands for all operations\n\n## Configuration Files\n- Genesis files (devnet/testnet) with initial accounts, validators\n- Environment templates (.env.example)\n- Docker volume and network configuration\n\n## Commands Available\nmake devnet-start/stop/restart/status/logs/destroy\nmake testnet-start/stop/restart/status/health/logs/destroy\nmake build/build-devnet/build-testnet\nmake test-api/test-faucet\nmake monitoring-start/stop\nmake clean/clean-all\n\n## Files Created\ndeploy/scripts/deploy-devnet.sh\ndeploy/scripts/deploy-testnet.sh\ndeploy/Makefile\ndeploy/README.md\ndeploy/configs/devnet/genesis.json\ndeploy/configs/devnet/.env.example\ndeploy/configs/testnet/genesis.json\ndeploy/configs/testnet/.env.example\n\nParent: CHG-2026-00007",
+  "status": "submitted",
+  "priority": "normal",
+  "risk": "low",
+  "type": "",
+  "industry": "healthcare",
+  "compliance_frameworks": [],
+  "affected_systems": [
+    "BlueBlocks Deployment"
+  ],
+  "acceptance_criteria": [],
+  "testing_plan": "",
+  "rollback_plan": "",
+  "created_by": "ryan@afterdarksys.com",
+  "created_at": "2026-01-17T00:27:06Z",
+  "updated_at": "2026-01-17T00:27:06Z",
+  "sprint": "2026-Q1-Sprint-1",
+  "assignee": null,
+  "approvals_required": [
+    "operations"
+  ],
+  "approvals": [],
+  "dependencies": [],
+  "comments": [
+    {
+      "author": "ryan@afterdarksys.com",
+      "timestamp": "2026-01-17T00:27:06Z",
+      "text": "Ticket created via CLI."
+    }
+  ],
+  "visibility": {
+    "restricted": true,
+    "allowed_users": [
+      "claude@afterdarksys.com",
+      "rams@afterdarksys.com",
+      "ryan@afterdarksys.com"
+    ],
+    "allowed_roles": [
+      "management"
+    ],
+    "reason": "BlueBlocks infrastructure planning - restricted to management team"
+  }
+}

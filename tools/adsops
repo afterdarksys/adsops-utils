@@ -186,6 +186,33 @@ run_hostctl() {
     "$ADSOPS_DIR/hostctl" "$@"
 }
 
+# Wrapper for infractl
+_run_infractl() {
+    local bin="$ADSOPS_DIR/infractl"
+    if ! command -v "$bin" &>/dev/null && ! [ -f "$bin" ]; then
+        # Fall back to PATH
+        bin="infractl"
+    fi
+    if ! command -v "$bin" &>/dev/null; then
+        echo -e "${RED}infractl not found. Build it:${NC}"
+        echo "  cd $ADSOPS_DIR/../infractl && make build && cp infractl $ADSOPS_DIR/"
+        return 1
+    fi
+    "$bin" "$@"
+}
+
+# Fetch statsagent JSON from a remote host via SSH
+_stats_from_host() {
+    local host="$1"
+    local port="${STATSAGENT_PORT:-9100}"
+    # Try direct HTTP first (if statsagent port is reachable), otherwise via SSH
+    if curl -sf --connect-timeout 3 "http://$host:$port/stats" 2>/dev/null; then
+        return 0
+    fi
+    # Fall back to fetching via SSH
+    ssh "$host" "curl -sf http://localhost:$port/stats 2>/dev/null || echo '{\"error\":\"statsagent not running\"}'"
+}
+
 # Wrapper for blackout with auto-env
 run_blackout() {
     # Ensure env vars are set
@@ -253,9 +280,31 @@ ${BOLD}HOST MANAGEMENT:${NC}
     host add <name> ...    Add host to inventory
     host show <name>       Show host details
     host search <query>    Search hosts
+    import                 Import hosts from ~/.ssh/config into inventory
+
+${BOLD}INFRA MANAGEMENT (Docker + k3s):${NC}
+    scan [host|--all]      Probe hosts: OS, Docker, k3s, statsagent
+    infra status [host]    Docker + k3s overview for a host
+    docker <cmd> <host>    Manage Docker containers (ls/start/stop/rm/logs/exec/pull/stats)
+    k3s <cmd> <host>       Manage k3s clusters (nodes/pods/svc/logs/apply/kubeconfig)
+    stats [host]           Fetch statsagent JSON from a host
 
 ${BOLD}MAINTENANCE:${NC}
     blackout <args>        Manage maintenance windows
+
+${BOLD}BASTION & ACCESS:${NC}
+    bastion <cmd>          OCI Bastion session management
+    jump <cmd>             Jump host access
+    backend <cmd>          Backend service connections
+
+${BOLD}OS MANAGEMENT:${NC}
+    osm <cmd>              OS Management session & agent operations
+    os-mgmt <cmd>          OS Management service operations
+    patch <cmd>            Patch management operations
+
+${BOLD}SECRETS & STATE:${NC}
+    secrets <cmd>          OCI Vault secrets management (also: param, params)
+    state <cmd>            Terraform state management
 
 ${BOLD}SSH KEYS:${NC}
     keys list              List SSH key mappings
@@ -276,11 +325,27 @@ ${BOLD}EXAMPLES:${NC}
     adsops connect keycloak-db           # Get access recommendation
     adsops discover                      # List all OCI resources
     adsops host list --status active     # List active hosts
+    adsops import                        # Import ~/.ssh/config hosts into inventory
+    adsops scan --all                    # Probe all hosts for Docker/k3s
+    adsops infra status web-01           # Docker + k3s overview for web-01
+    adsops docker ls web-01              # List containers on web-01
+    adsops docker logs web-01 myapp -f   # Follow container logs
+    adsops k3s pods web-01               # List all pods
+    adsops k3s apply web-01 -f app.yaml  # Apply a manifest
+    adsops stats web-01                  # Show statsagent JSON from web-01
     adsops keys list                     # Show SSH key mappings
     adsops tunnel keycloak_db            # Start DB tunnel
+    adsops bastion list-sessions         # List OCI bastion sessions
+    adsops jump connect 10.0.1.5         # Connect via jump host
+    adsops osm list-agents               # List OSM managed instances
+    adsops patch status                  # Show patch compliance status
+    adsops secrets get my-secret         # Get a secret from OCI Vault
+    adsops state list                    # List Terraform state resources
+    adsops backend connect-postgres 10.0.1.5 5432 mydb admin
 
 ${BOLD}ENVIRONMENT:${NC}
     ADSOPS_DIR             Toolkit directory (default: /usr/local/sshkeys)
+    OPSCTL_ENV             Environment for opsctl modules (dev/staging/prod)
     INVENTORY_DB_USER      Database username for inventory
     INVENTORY_DB_PASSWORD  Database password for inventory
 
@@ -352,9 +417,81 @@ main() {
             ${EDITOR:-vim} "$ADSOPS_DIR/.env"
             ;;
 
+        # opsctl modules
+        bastion)
+            python3 "$ADSOPS_DIR/../opsctl.py" ${OPSCTL_ENV:+--env $OPSCTL_ENV} bastion "$@"
+            ;;
+        osm|osm-session)
+            python3 "$ADSOPS_DIR/../opsctl.py" ${OPSCTL_ENV:+--env $OPSCTL_ENV} osm "$@"
+            ;;
+        patch|patch-mgmt)
+            python3 "$ADSOPS_DIR/../opsctl.py" ${OPSCTL_ENV:+--env $OPSCTL_ENV} patch "$@"
+            ;;
+        secrets|secret|param|params)
+            python3 "$ADSOPS_DIR/../opsctl.py" ${OPSCTL_ENV:+--env $OPSCTL_ENV} secrets "$@"
+            ;;
+        state|tf-state)
+            python3 "$ADSOPS_DIR/../opsctl.py" ${OPSCTL_ENV:+--env $OPSCTL_ENV} state "$@"
+            ;;
+        os-mgmt|osmgmt)
+            python3 "$ADSOPS_DIR/../opsctl.py" ${OPSCTL_ENV:+--env $OPSCTL_ENV} os-mgmt "$@"
+            ;;
+        jump|jump-host)
+            python3 "$ADSOPS_DIR/../opsctl.py" ${OPSCTL_ENV:+--env $OPSCTL_ENV} jump "$@"
+            ;;
+        backend)
+            python3 "$ADSOPS_DIR/../opsctl.py" ${OPSCTL_ENV:+--env $OPSCTL_ENV} backend "$@"
+            ;;
+
+        # SSH config import → hostctl
+        import|import-hosts)
+            run_hostctl import ssh-config "$@"
+            ;;
+
+        # infractl: scan all hosts
+        scan)
+            _run_infractl scan "$@"
+            ;;
+
+        # infractl: status overview
+        infra|infra-status)
+            local subcmd="${1:-status}"
+            shift || true
+            _run_infractl "$subcmd" "$@"
+            ;;
+
+        # Docker management
+        docker|container|containers)
+            local subcmd="${1:-ls}"
+            shift || true
+            _run_infractl docker "$subcmd" "$@"
+            ;;
+
+        # k3s management
+        k3s|k8s|kube|kubectl)
+            local subcmd="${1:-pods}"
+            shift || true
+            _run_infractl k3s "$subcmd" "$@"
+            ;;
+
+        # statsagent: fetch JSON from a host
+        stats|statsagent)
+            local target="${1:-}"
+            if [ -z "$target" ]; then
+                echo -e "${RED}Usage: adsops stats <host>${NC}"
+                exit 1
+            fi
+            echo -e "${CYAN}Fetching stats from $target...${NC}"
+            _stats_from_host "$target"
+            ;;
+
         # Direct tool access
         hostctl)
             run_hostctl "$@"
+            ;;
+
+        infractl)
+            _run_infractl "$@"
             ;;
 
         # Help

@@ -40,6 +40,7 @@ func main() {
 	rootCmd.AddCommand(newListCommand())
 	rootCmd.AddCommand(newShowCommand())
 	rootCmd.AddCommand(newSearchCommand())
+	rootCmd.AddCommand(newImportCommand())
 	rootCmd.AddCommand(newVersionCommand())
 
 	if err := rootCmd.Execute(); err != nil {

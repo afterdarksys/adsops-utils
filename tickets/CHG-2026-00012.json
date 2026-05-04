@@ -1,0 +1,52 @@
+{
+  "id": "CHG-2026-00012",
+  "title": "BlueBlocks: Monitoring & Database Infrastructure",
+  "description": "Set up monitoring stack and database infrastructure for BlueBlocks testnet.\n\n## Monitoring Stack\n- Prometheus for metrics collection\n- Grafana for dashboards and alerting\n- Pre-configured datasources and dashboard provisioning\n\n## Database (TimescaleDB)\nComprehensive schema for block indexer with hypertables for time-series data:\n- blocks - Block data with height, hash, proposer\n- transactions - Transaction history with status, gas\n- accounts - Account balances and metadata\n- contracts - Deployed contracts with code/ABI\n- validators - Validator registry with stake, uptime\n- events - Contract event logs\n- health_records - HIPAA-compliant metadata (no PHI)\n- treasury_transactions - Ethereum bridge transactions\n- network_stats - Aggregated network statistics\n\n## Features\n- Continuous aggregates for hourly/daily stats\n- Retention policies for data lifecycle\n- Full-text search indexes\n- Audit-safe constraints\n\n## Files Created\ndeploy/configs/testnet/prometheus.yml\ndeploy/configs/testnet/grafana/provisioning/datasources/datasources.yml\ndeploy/configs/testnet/grafana/provisioning/dashboards/dashboards.yml\ndeploy/configs/testnet/init-db.sql\n\nParent: CHG-2026-00007",
+  "status": "submitted",
+  "priority": "normal",
+  "risk": "low",
+  "type": "",
+  "industry": "healthcare",
+  "compliance_frameworks": [
+    "hipaa"
+  ],
+  "affected_systems": [
+    "BlueBlocks Monitoring",
+    "TimescaleDB",
+    "Prometheus",
+    "Grafana"
+  ],
+  "acceptance_criteria": [],
+  "testing_plan": "",
+  "rollback_plan": "",
+  "created_by": "ryan@afterdarksys.com",
+  "created_at": "2026-01-17T00:26:53Z",
+  "updated_at": "2026-01-17T00:26:53Z",
+  "sprint": "2026-Q1-Sprint-1",
+  "assignee": null,
+  "approvals_required": [
+    "it",
+    "operations"
+  ],
+  "approvals": [],
+  "dependencies": [],
+  "comments": [
+    {
+      "author": "ryan@afterdarksys.com",
+      "timestamp": "2026-01-17T00:26:53Z",
+      "text": "Ticket created via CLI."
+    }
+  ],
+  "visibility": {
+    "restricted": true,
+    "allowed_users": [
+      "claude@afterdarksys.com",
+      "rams@afterdarksys.com",
+      "ryan@afterdarksys.com"
+    ],
+    "allowed_roles": [
+      "management"
+    ],
+    "reason": "BlueBlocks infrastructure planning - restricted to management team"
+  }
+}

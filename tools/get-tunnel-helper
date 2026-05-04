@@ -1,0 +1,58 @@
+#!/bin/bash
+# get-tunnel-helper - Find and display tunnel helper utilities
+# Part of the SSH Key Management System
+
+# Colors for output
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+echo -e "${BLUE}=== Tunnel Helper Utilities ===${NC}\n"
+
+# List of tunnel utilities and their locations
+declare -A TUNNELS=(
+    ["n8ntunnel"]="/usr/local/bin/n8ntunnel.py"
+    ["oci-tunnel"]="/usr/local/bin/oci-tunnel.py"
+    ["cloudflared"]="/usr/local/bin/cloudflared"
+)
+
+echo -e "${GREEN}Available Tunnel Utilities:${NC}\n"
+
+for name in "${!TUNNELS[@]}"; do
+    path="${TUNNELS[$name]}"
+    if [ -f "$path" ]; then
+        echo -e "  ${GREEN}✓${NC} $name"
+        echo -e "    Path: ${BLUE}$path${NC}"
+        if [ -x "$path" ]; then
+            echo -e "    Status: ${GREEN}Executable${NC}"
+        else
+            echo -e "    Status: ${YELLOW}Not Executable${NC}"
+        fi
+    else
+        echo -e "  ${YELLOW}✗${NC} $name"
+        echo -e "    Path: ${BLUE}$path${NC} (not found)"
+    fi
+    echo ""
+done
+
+echo -e "${BLUE}=== Cloudflare Tunnel Info ===${NC}"
+if [ -f "/Users/ryan/development/oci-cloudflared/.env" ]; then
+    echo -e "${GREEN}Cloudflare Tunnel Configuration:${NC}"
+    echo "  Config: /Users/ryan/development/oci-cloudflared/config.yml"
+    echo "  Token: Available in .env"
+    echo "  Tunnel ID: 9e60e1aa-2008-4f00-bcef-7f481192c90c"
+fi
+
+echo ""
+echo -e "${BLUE}=== Usage Examples ===${NC}"
+echo ""
+echo "1. OCI Bastion Tunnel (n8n):"
+echo "   n8ntunnel.py -s <session_ocid> -p 2222 -k ~/.ssh/id_ed25519"
+echo ""
+echo "2. Cloudflare Tunnel SSH:"
+echo "   cloudflared access ssh --hostname ssh-keycloak-direct.adstelco.io"
+echo ""
+echo "3. Check tunnel status:"
+echo "   ps aux | grep -E 'tunnel|cloudflared|ssh'"
+echo ""

@@ -1,0 +1,46 @@
+{
+  "id": "CHG-2026-00014",
+  "title": "BlueBlocks: Fix Go Version in Dockerfiles",
+  "description": "Fix Go version reference in Dockerfiles from 1.24 to 1.23.\n\n## Issue\nDockerfiles reference golang:1.24-alpine which doesn't exist. Should be golang:1.23-alpine.\n\n## Files to Update\n- deploy/docker/Dockerfile.node\n- deploy/docker/Dockerfile.validator\n- deploy/docker/Dockerfile.miner\n- deploy/docker/Dockerfile.treasury\n- deploy/docker/Dockerfile.indexer\n- deploy/docker/Dockerfile.discovery\n\n## Identified In\nTeam meeting 2026-01-16\n\nParent: CHG-2026-00007",
+  "status": "submitted",
+  "priority": "high",
+  "risk": "low",
+  "type": "",
+  "industry": "healthcare",
+  "compliance_frameworks": [],
+  "affected_systems": [
+    "BlueBlocks Docker"
+  ],
+  "acceptance_criteria": [],
+  "testing_plan": "",
+  "rollback_plan": "",
+  "created_by": "ryan@afterdarksys.com",
+  "created_at": "2026-01-17T00:33:21Z",
+  "updated_at": "2026-01-17T00:33:21Z",
+  "sprint": "2026-Q1-Sprint-1",
+  "assignee": null,
+  "approvals_required": [
+    "it"
+  ],
+  "approvals": [],
+  "dependencies": [],
+  "comments": [
+    {
+      "author": "ryan@afterdarksys.com",
+      "timestamp": "2026-01-17T00:33:21Z",
+      "text": "Ticket created via CLI."
+    }
+  ],
+  "visibility": {
+    "restricted": true,
+    "allowed_users": [
+      "claude@afterdarksys.com",
+      "rams@afterdarksys.com",
+      "ryan@afterdarksys.com"
+    ],
+    "allowed_roles": [
+      "management"
+    ],
+    "reason": "BlueBlocks infrastructure planning - restricted to management team"
+  }
+}

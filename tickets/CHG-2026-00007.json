@@ -1,0 +1,52 @@
+{
+  "id": "CHG-2026-00007",
+  "title": "BlueBlocks: Testnet/Devnet Deployment Infrastructure",
+  "description": "Epic: Deploy testnet and devnet infrastructure for BlueBlocks healthcare blockchain platform.\n\n## Scope\nThis effort includes creating all necessary deployment scripts, Docker configurations, and infrastructure code to enable:\n- Local development network (devnet) - single node for development\n- Test network (testnet) - multi-node environment for integration testing\n\n## Deliverables\n1. Docker configurations for all components (node, validator, miner, treasury, indexer)\n2. Docker Compose files for devnet and testnet environments\n3. Deployment shell scripts with health checks\n4. Genesis configuration files\n5. Database schema for TimescaleDB indexer\n6. Prometheus/Grafana monitoring stack\n7. Block explorer web application\n8. HIPAA-compliant P2P protocol for healthcare data transfer\n9. Discovery service for P2P network registration\n\n## Technical Details\n- Language: Go 1.24, TypeScript/Next.js\n- Database: TimescaleDB (PostgreSQL extension)\n- Monitoring: Prometheus + Grafana\n- Container: Docker + Docker Compose\n\n## Compliance\nHealthcare data handling requires HIPAA compliance with:\n- End-to-end encryption (AES-256-GCM, X25519)\n- Audit logging\n- Access control via smart contracts",
+  "status": "submitted",
+  "priority": "high",
+  "risk": "medium",
+  "type": "",
+  "industry": "healthcare",
+  "compliance_frameworks": [
+    "hipaa"
+  ],
+  "affected_systems": [
+    "BlueBlocks Blockchain",
+    "Healthcare Data Platform",
+    "P2P Network"
+  ],
+  "acceptance_criteria": [],
+  "testing_plan": "",
+  "rollback_plan": "",
+  "created_by": "ryan@afterdarksys.com",
+  "created_at": "2026-01-17T00:24:27Z",
+  "updated_at": "2026-01-17T00:24:27Z",
+  "sprint": "2026-Q1-Sprint-1",
+  "assignee": null,
+  "approvals_required": [
+    "operations",
+    "it",
+    "security"
+  ],
+  "approvals": [],
+  "dependencies": [],
+  "comments": [
+    {
+      "author": "ryan@afterdarksys.com",
+      "timestamp": "2026-01-17T00:24:27Z",
+      "text": "Ticket created via CLI."
+    }
+  ],
+  "visibility": {
+    "restricted": true,
+    "allowed_users": [
+      "claude@afterdarksys.com",
+      "rams@afterdarksys.com",
+      "ryan@afterdarksys.com"
+    ],
+    "allowed_roles": [
+      "management"
+    ],
+    "reason": "BlueBlocks infrastructure planning - restricted to management team"
+  }
+}

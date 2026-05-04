@@ -1,0 +1,49 @@
+{
+  "id": "CHG-2026-00015",
+  "title": "BlueBlocks: HIPAA Risk Assessment & BAA Templates",
+  "description": "Create formal HIPAA risk assessment and Business Associate Agreement templates.\n\n## Compliance Requirements\n\n### Risk Assessment (§164.308(a)(1))\n- Identify all systems handling PHI\n- Document potential threats and vulnerabilities\n- Assess likelihood and impact\n- Document current safeguards\n- Determine residual risk\n\n### BAA Templates Needed\n1. Cloud provider BAA (AWS/OCI)\n2. Healthcare partner BAA\n3. Third-party service BAA\n\n## HIPAA Gaps Identified\n- No formal risk assessment document\n- No BAA templates\n- No breach notification procedures\n- No privacy notice\n\n## Identified In\nTeam meeting 2026-01-16 - Pat Williams (CCO)\n\nParent: CHG-2026-00007",
+  "status": "submitted",
+  "priority": "urgent",
+  "risk": "high",
+  "type": "",
+  "industry": "healthcare",
+  "compliance_frameworks": [
+    "hipaa"
+  ],
+  "affected_systems": [
+    "BlueBlocks Compliance"
+  ],
+  "acceptance_criteria": [],
+  "testing_plan": "",
+  "rollback_plan": "",
+  "created_by": "ryan@afterdarksys.com",
+  "created_at": "2026-01-17T00:33:32Z",
+  "updated_at": "2026-01-17T00:33:32Z",
+  "sprint": "2026-Q1-Sprint-1",
+  "assignee": null,
+  "approvals_required": [
+    "operations",
+    "security"
+  ],
+  "approvals": [],
+  "dependencies": [],
+  "comments": [
+    {
+      "author": "ryan@afterdarksys.com",
+      "timestamp": "2026-01-17T00:33:32Z",
+      "text": "Ticket created via CLI."
+    }
+  ],
+  "visibility": {
+    "restricted": true,
+    "allowed_users": [
+      "claude@afterdarksys.com",
+      "rams@afterdarksys.com",
+      "ryan@afterdarksys.com"
+    ],
+    "allowed_roles": [
+      "management"
+    ],
+    "reason": "BlueBlocks infrastructure planning - restricted to management team"
+  }
+}

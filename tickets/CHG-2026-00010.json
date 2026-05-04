@@ -1,0 +1,46 @@
+{
+  "id": "CHG-2026-00010",
+  "title": "BlueBlocks: Block Explorer Web Application",
+  "description": "Create web-based block explorer for BlueBlocks testnet/devnet.\n\n## Technology Stack\n- Framework: Next.js 14 (React)\n- Styling: Tailwind CSS\n- State: TanStack Query + Zustand\n- Charts: Recharts\n\n## Features\n- Real-time block updates via WebSocket/SSE\n- Network statistics dashboard\n- Transaction search and details\n- Account balance viewer\n- Validator status and leaderboard\n- Contract inspection\n- Faucet interface for test tokens\n\n## Pages\n- / - Dashboard with stats, latest blocks/txs\n- /blocks - Block list and details\n- /transactions - Transaction list and details\n- /validators - Validator list and status\n- /contracts - Contract explorer\n- /faucet - Request test tokens\n\n## Files Created\nexplorer/package.json\nexplorer/tsconfig.json\nexplorer/tailwind.config.ts\nexplorer/next.config.js\nexplorer/Dockerfile\nexplorer/src/app/layout.tsx\nexplorer/src/app/page.tsx\nexplorer/src/app/globals.css\nexplorer/src/lib/api.ts\nexplorer/src/lib/utils.ts\nexplorer/src/types/index.ts\n\nParent: CHG-2026-00007",
+  "status": "submitted",
+  "priority": "normal",
+  "risk": "low",
+  "type": "",
+  "industry": "healthcare",
+  "compliance_frameworks": [],
+  "affected_systems": [
+    "BlueBlocks Block Explorer"
+  ],
+  "acceptance_criteria": [],
+  "testing_plan": "",
+  "rollback_plan": "",
+  "created_by": "ryan@afterdarksys.com",
+  "created_at": "2026-01-17T00:26:16Z",
+  "updated_at": "2026-01-17T00:26:16Z",
+  "sprint": "2026-Q1-Sprint-1",
+  "assignee": null,
+  "approvals_required": [
+    "it"
+  ],
+  "approvals": [],
+  "dependencies": [],
+  "comments": [
+    {
+      "author": "ryan@afterdarksys.com",
+      "timestamp": "2026-01-17T00:26:16Z",
+      "text": "Ticket created via CLI."
+    }
+  ],
+  "visibility": {
+    "restricted": true,
+    "allowed_users": [
+      "claude@afterdarksys.com",
+      "rams@afterdarksys.com",
+      "ryan@afterdarksys.com"
+    ],
+    "allowed_roles": [
+      "management"
+    ],
+    "reason": "BlueBlocks infrastructure planning - restricted to management team"
+  }
+}
