@@ -42,12 +42,13 @@ Does NOT deliver: sysscript library files (.star), per-service scripts, inventor
 - **D-11:** Enforcement is in `buildSysModule()`: if `!AllowContainers`, the `"containers"` key is not added to `sysDict` at all. Same for `"k3s"` and `AllowK3s`. The namespace is absent from the Starlark env, not just empty. This satisfies success criteria #6.
 
 ### Telemetry (carry-forward from ROADMAP)
-- **D-12:** Proto bindings from `adsops-utils/gen/go/adsops/v1/` imported via `go.mod replace` directive (per ROADMAP Phase 3 dependency note). `TelemetryPayload` extended with `Docker []ContainerStats` and `K3s K3sStats` fields aligned to proto definitions.
+- **D-12:** `TelemetryPayload` extended with `Docker` and `K3s` fields aligned to proto definitions via JSON tag matching. **Revised (planning):** Option A (local mirror structs with matching JSON tags) accepted in lieu of direct proto import — avoids compile-time name collision. No `go.mod replace` directive required.
 
 ### Claude's Discretion
 - Docker API version to target (use `v1.41` or negotiate via API version negotiation endpoint)
 - k8s API client implementation details (raw HTTP with TLS from kubeconfig, no k8s client-go dependency unless needed)
 - JSON struct tags and exact field naming for telemetry additions
+- Whether to use direct proto import or local mirror structs for telemetry alignment (Option A: mirror structs selected)
 - Error logging verbosity and format (use existing `log.Printf` pattern)
 - Whether to cache Docker/k3s data between telemetry ticks or re-query every 5s
 

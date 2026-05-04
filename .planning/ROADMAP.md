@@ -71,9 +71,14 @@ Plans:
   6. `sys.containers` and `sys.k3s` namespaces are absent (not just empty) when the agent lacks the required entitlement
 **Plans**: 4 plans
 Plans:
+**Wave 1**
 - [ ] 03-01-PLAN.md — Foundation: go.mod, entitlements, Thread.Load, client type stubs
+
+**Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 03-02-PLAN.md — Docker client + sys.containers builtins + tests
 - [ ] 03-03-PLAN.md — k3s client + sys.k3s builtins + tests
+
+**Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 03-04-PLAN.md — Telemetry extension with Docker/k3s fields + tests
 **UI hint**: no
 
