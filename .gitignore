@@ -47,6 +47,11 @@ logs/
 ehthumbs.db
 Thumbs.db
 
+# Python
+__pycache__/
+*.egg-info/
+*.pyc
+
 # Build output
 /dist/
 /build/
