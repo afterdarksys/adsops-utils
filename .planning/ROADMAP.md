@@ -44,11 +44,15 @@ Plans:
 **Requirements**: PY-01, PY-02, PY-03, PY-04, PY-05, PY-06, PY-07
 **Success Criteria** (what must be TRUE):
   1. `pip install -e tools/adsops/` succeeds and places `adsops` binary on PATH
-  2. `adsops hostctl list` returns inventory entries using the same SQLite DB as the Go hostctl binary
-  3. `adsops infractl docker ls <host>` executes over SSH via paramiko and returns container list
+  2. `adsops hostctl list` returns inventory entries using the same PostgreSQL DB as the Go hostctl binary
+  3. `adsops infractl docker ls <host>` executes over SSH via asyncssh and returns container list
   4. `adsops stats once` collects local host metrics and prints output
   5. `MockSys` passes all unit tests without requiring SSH, Docker, or a live agent — test suite runs with `pytest tools/adsops/`
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 02-01-PLAN.md — Package scaffolding, config, output utils, hostctl module + tests
+- [ ] 02-02-PLAN.md — infractl module (asyncssh, Docker, k3s commands) + tests
+- [ ] 02-03-PLAN.md — stats module, MockSys harness, CLI finalization + tests
 **UI hint**: no
 
 ### Phase 3: systemapi-agent Improvements
@@ -114,7 +118,7 @@ Phases 4, 5, 6 unlock after Phase 3; Phases 5 and 6 can run in parallel.
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Proto Data Contracts | 0/3 | Planning complete | - |
-| 2. Python3 Package | 0/? | Not started | - |
+| 2. Python3 Package | 0/3 | Planning complete | - |
 | 3. systemapi-agent Improvements | 0/? | Not started | - |
 | 4. Sysscript Ecosystem | 0/? | Not started | - |
 | 5. Inventory Hierarchy | 0/? | Not started | - |
