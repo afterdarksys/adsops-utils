@@ -522,18 +522,18 @@ STATS_FIXTURES = {
 | A2 | statsagent health check endpoint is `/health` or `/healthz` (responds 200 when healthy) | Architecture Patterns | If endpoint differs, health.star needs adjustment. Low risk: easy to fix in the script. |
 | A3 | lib/*.star helper functions return dicts (not structured strings) | Architecture Patterns | Determines how service scripts consume lib output. Low risk: test failures catch mismatches immediately. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Prometheus metric names for changes-api**
    - What we know: Standard Go HTTP middleware uses `http_requests_total` and `http_request_duration_seconds`
    - What's unclear: Whether changes-api uses a custom framework or metric prefix
    - Recommendation: Claude's Discretion per CONTEXT.md — start with standard names and adjust if integration test against live host fails (success criteria 4 requires live host test)
-
+   - RESOLVED: Use standard `http_requests_total` and `http_request_duration_seconds` metric names. These are the Go HTTP middleware defaults. Script author adjusts if live host uses custom names.
 2. **statsagent health endpoint path**
    - What we know: Most health check endpoints are `/health` or `/healthz`
    - What's unclear: What path statsagent actually exposes
    - Recommendation: Default to `/health` in health.star; easy to update when tested against live host
-
+   - RESOLVED: Default to `/health`. Easy single-line change if live testing reveals a different path.
 ## Environment Availability
 
 | Dependency | Required By | Available | Version | Fallback |

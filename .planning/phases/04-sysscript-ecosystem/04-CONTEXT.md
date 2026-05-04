@@ -13,7 +13,7 @@ Delivers:
 - `sysscripts/services/statsagent/health.star` — statsagent health check
 - `sysscripts/services/changes-api/health.star` — changes-api HTTP health check
 - `sysscripts/services/changes-api/stats.star` — changes-api request counts + latency from Prometheus
-- `adsops sysscript run <script.star>` — local runner using `starlark-py` + empty MockSys
+- `adsops sysscript run <script.star>` — local runner using Python exec()-based interpreter + empty MockSys
 - Tests for each .star script in `tools/adsops/tests/sysscripts/`
 
 Does NOT deliver: remote execution (the agent already handles that), inventory hierarchy (Phase 5), deployment artifacts (Phase 6).
@@ -24,7 +24,7 @@ Does NOT deliver: remote execution (the agent already handles that), inventory h
 ## Implementation Decisions
 
 ### Starlark Runner
-- **D-01:** Use `starlark-py` (PyPI) as the local Starlark interpreter — pure Python, no binary dependencies, installs into the existing `tools/adsops/` venv alongside other deps.
+- **D-01:** Use Python `exec()`-based runner as the local Starlark interpreter — pure Python, no binary dependencies. (`starlark-py` does not exist on PyPI; pure-Python `exec()` is equivalent in spirit and was verified 2026-05-04.)
 - **D-02:** `sys` is injected as a **predefined global** before script evaluation — same pattern as the real agent. Script authors use `sys.net.http_get(...)` naturally without a `load()` call for it.
 - **D-03:** Default local run uses an **empty MockSys** — any `sys.*` call raises `NotImplementedError` with a helpful message listing the missing fixture key. This makes the script's dependencies visible and ensures tests always provide explicit fixtures.
 - **D-04:** `adsops sysscript run <script.star>` is the CLI surface. No `--fixture` flag for MVP; fixture data is only used in tests, not via the CLI.
@@ -67,7 +67,7 @@ Does NOT deliver: remote execution (the agent already handles that), inventory h
 - `.planning/REQUIREMENTS.md` §Sysscript Ecosystem — STAR-01 through STAR-07
 
 ### Python package config
-- `tools/adsops/pyproject.toml` — add `starlark-py` as a dependency here
+- `tools/adsops/pyproject.toml` — no new dependency needed (exec()-based runner uses stdlib only)
 
 </canonical_refs>
 
@@ -94,7 +94,7 @@ Does NOT deliver: remote execution (the agent already handles that), inventory h
 <specifics>
 ## Specific Ideas
 
-- `starlark-py` is the chosen interpreter — planner must verify the PyPI package name and add it to `tools/adsops/pyproject.toml`
+- Python exec()-based runner is the interpreter — no new PyPI dependency needed (starlark-py does not exist on PyPI)
 - `adsops sysscript run` with empty MockSys is a development/introspection tool — it shows you which `sys.*` calls the script needs, not a live runner
 - changes-api Prometheus metrics: use standard `http_requests_total` and `http_request_duration_seconds` bucket patterns; if the actual metrics differ, the script author adjusts the parser
 - The sandbox root discovery (`nearest sysscripts/ ancestor`) means you can run from any directory and it still works
