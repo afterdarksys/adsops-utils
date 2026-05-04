@@ -51,7 +51,7 @@ Plans:
 **Plans**: 3 plans
 Plans:
 - [x] 02-01-PLAN.md — Package scaffolding, config, output utils, hostctl module + tests
-- [ ] 02-02-PLAN.md — infractl module (asyncssh, Docker, k3s commands) + tests
+- [x] 02-02-PLAN.md — infractl module (asyncssh, Docker, k3s commands) + tests
 - [ ] 02-03-PLAN.md — stats module, MockSys harness, CLI finalization + tests
 **UI hint**: no
 
