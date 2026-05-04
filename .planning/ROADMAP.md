@@ -91,12 +91,16 @@ Plans:
   2. `sysscripts/lib/host.star`, `sysscripts/lib/docker.star`, and `sysscripts/lib/k3s.star` are importable from service scripts via `load()`
   3. Each `.star` script under `sysscripts/services/` has a corresponding passing test in `tools/adsops/tests/sysscripts/`
   4. `sysscripts/services/changes-api/stats.star` returns request counts and latency when run against a live host
-**Plans**: 4 plans
+**Plans**: 3 plans
 Plans:
-- [x] 03-01-PLAN.md — Foundation: go.mod, entitlements, Thread.Load, client type stubs
-- [x] 03-02-PLAN.md — Docker client + sys.containers builtins + tests
-- [x] 03-03-PLAN.md — k3s client + sys.k3s builtins + tests
-- [x] 03-04-PLAN.md — Telemetry extension with Docker/k3s fields + tests
+**Wave 1**
+- [ ] 04-01-PLAN.md — SysscriptRunner (exec-based), CLI sub-app, runner tests
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 04-02-PLAN.md — Shared lib helpers (host.star, docker.star, k3s.star) + tests
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 04-03-PLAN.md — Service scripts (statsagent, changes-api health/stats) + tests + verification
 **UI hint**: no
 
 ### Phase 5: Inventory Hierarchy
@@ -145,6 +149,6 @@ Phases 4, 5, 6 unlock after Phase 3; Phases 5 and 6 can run in parallel.
 | 1. Proto Data Contracts | 0/3 | Planning complete | - |
 | 2. Python3 Package | 0/3 | Planning complete | - |
 | 3. systemapi-agent Improvements | 0/? | Not started | - |
-| 4. Sysscript Ecosystem | 0/? | Not started | - |
+| 4. Sysscript Ecosystem | 0/3 | Planning complete | - |
 | 5. Inventory Hierarchy | 0/? | Not started | - |
 | 6. Deployment Artifacts | 0/? | Not started | - |
