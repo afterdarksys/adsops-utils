@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 2: Python3 Package** - tools/adsops/ package with Typer CLI, SSH, MockSys, proto imports
 - [ ] **Phase 3: systemapi-agent Improvements** - SEPARATE REPO: real sys.containers, sys.k3s, Thread.Load, extended telemetry
 - [ ] **Phase 4: Sysscript Ecosystem** - sysscripts/lib/ helpers + per-service scripts + Python test harness
-- [ ] **Phase 5: Inventory Hierarchy** - hierarchical host→container→pod model, hostctl --children, infractl scan writeback
+- [ ] **Phase 5: Inventory Hierarchy** - hierarchical host->container->pod model, hostctl --children, infractl scan writeback
 - [ ] **Phase 6: Deployment Artifacts** - Dockerfiles, k3s DaemonSet manifests, docker-compose profiles
 
 ## Phase Details
@@ -31,7 +31,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Generated Python bindings install via `pip install -e gen/python/` and are importable as `from adsops.v1 import host_pb2`
   4. `make proto-lint` and `make proto-breaking` targets exist and pass
   5. `gen/` directory is committed to the repo (downstream phases can import without buf installed)
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 01-01-PLAN.md — buf toolchain setup, config files, Makefile targets
+- [ ] 01-02-PLAN.md — proto definitions (all 5 .proto files)
+- [ ] 01-03-PLAN.md — code generation, Python packaging, Go/Python verification
 **UI hint**: no
 
 ### Phase 2: Python3 Package
@@ -77,7 +81,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **UI hint**: no
 
 ### Phase 5: Inventory Hierarchy
-**Goal**: The hostctl inventory reflects a host→container→pod hierarchy, and infractl scan populates it automatically
+**Goal**: The hostctl inventory reflects a host->container->pod hierarchy, and infractl scan populates it automatically
 **Depends on**: Phase 3
 **Requirements**: INV-01, INV-02, INV-03, INV-04
 **Success Criteria** (what must be TRUE):
@@ -104,12 +108,12 @@ Decimal phases appear between their surrounding integers in numeric order.
 ## Progress
 
 **Execution Order:**
-Phases 1 → 2 → 3 are strictly sequential (proto dependency chain).
+Phases 1 -> 2 -> 3 are strictly sequential (proto dependency chain).
 Phases 4, 5, 6 unlock after Phase 3; Phases 5 and 6 can run in parallel.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Proto Data Contracts | 0/? | Not started | - |
+| 1. Proto Data Contracts | 0/3 | Planning complete | - |
 | 2. Python3 Package | 0/? | Not started | - |
 | 3. systemapi-agent Improvements | 0/? | Not started | - |
 | 4. Sysscript Ecosystem | 0/? | Not started | - |
