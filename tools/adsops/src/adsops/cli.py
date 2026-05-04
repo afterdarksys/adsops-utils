@@ -24,6 +24,12 @@ def _register():
     except ImportError:
         pass
 
+    try:
+        from adsops.sysscript.cli import app as sysscript_app
+        app.add_typer(sysscript_app, name="sysscript")
+    except ImportError:
+        pass
+
 
 _register()
 
