@@ -24,8 +24,8 @@ Every component — Go tool, Python script, Sysscript, deployed agent — shares
 - [x] Proto data contracts: shared .proto definitions for TelemetryPayload, HostRecord, ContainerStats, K3sStats, StatsSnapshot — Validated in Phase 1
 - [x] Go bindings generated from protos (consumed by statsagent, future API) — Validated in Phase 1
 - [x] Python3 bindings generated from protos — Validated in Phase 1
-- [ ] Python3 package (tools/adsops/) with CLI parity: hostctl, infractl, stats modules
-- [ ] Python3 sysscript test harness: mock sys module for local .star testing
+- [x] Python3 package (tools/adsops/) with CLI parity: hostctl, infractl, stats modules — Validated in Phase 2
+- [x] Python3 sysscript test harness: mock sys module for local .star testing — Validated in Phase 2
 - [ ] systemapi-agent: real sys.containers (Docker socket, not stub)
 - [ ] systemapi-agent: sys.k3s module (Kubernetes API)
 - [ ] systemapi-agent: telemetry includes Docker container stats + k3s state
