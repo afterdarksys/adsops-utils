@@ -211,6 +211,7 @@ tools/adsops/
     ├── test_hostctl.py
     ├── test_infractl.py
     ├── test_stats.py
+    ├── test_cli.py
     └── test_mocksys.py
 ```
 
@@ -521,13 +522,13 @@ Step 2.5 skipped — this is a greenfield creation phase. No rename/refactor inv
 
 | Req ID | Behavior | Test Type | Automated Command | File Exists? |
 |--------|----------|-----------|-------------------|-------------|
-| PY-01 | `pip install -e .` places `adsops` on PATH | smoke | `which adsops && adsops --help` | ❌ Wave 0 |
-| PY-02 | `adsops hostctl list` returns rows using env vars | unit (mocked session) | `pytest tests/test_hostctl.py -x` | ❌ Wave 0 |
-| PY-03 | `adsops infractl docker ls <host>` returns container list | unit (MockSys/asyncssh mock) | `pytest tests/test_infractl.py -x` | ❌ Wave 0 |
-| PY-04 | `adsops stats once` collects local metrics | unit (psutil real call) | `pytest tests/test_stats.py -x` | ❌ Wave 0 |
-| PY-05 | CLI entry point routes to subcommands | unit (Typer test client) | `pytest tests/test_cli.py -x` | ❌ Wave 0 |
-| PY-06 | MockSys passes fixture data without SSH/Docker/agent | unit | `pytest tests/test_mocksys.py -x` | ❌ Wave 0 |
-| PY-07 | `--json` outputs valid proto JSON; `--proto` outputs binary | unit | `pytest tests/test_output.py -x` | ❌ Wave 0 |
+| PY-01 | `pip install -e .` places `adsops` on PATH | smoke | `which adsops && adsops --help` | N/A Wave 0 |
+| PY-02 | `adsops hostctl list` returns rows using env vars | unit (mocked session) | `pytest tests/test_hostctl.py -x` | N/A Wave 0 |
+| PY-03 | `adsops infractl docker ls <host>` returns container list | unit (MockSys/asyncssh mock) | `pytest tests/test_infractl.py -x` | N/A Wave 0 |
+| PY-04 | `adsops stats once` collects local metrics | unit (psutil real call) | `pytest tests/test_stats.py -x` | N/A Wave 0 |
+| PY-05 | CLI entry point routes to subcommands | unit (Typer test client) | `pytest tests/test_cli.py -x` | N/A Wave 0 |
+| PY-06 | MockSys passes fixture data without SSH/Docker/agent | unit | `pytest tests/test_mocksys.py -x` | N/A Wave 0 |
+| PY-07 | `--json` outputs valid proto JSON; `--proto` outputs binary | unit | `pytest tests/test_output.py -x` | N/A Wave 0 |
 
 ### Sampling Rate
 - **Per task commit:** `python3.11 -m pytest tools/adsops/tests/ -x -q`
@@ -666,17 +667,17 @@ def list_hosts(
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **SSH config parsing — use library or hand-roll?**
    - What we know: Go infractl has a custom parser in `tools/infractl/ssh/config.go`. Python has no stdlib SSH config parser but `paramiko.SSHConfig` handles Include directives.
    - What's unclear: Whether `paramiko` should be added as a dep just for SSH config parsing (heavy dep for one feature).
-   - Recommendation: Implement a lightweight parser modeled on the Go `config.go` — it only needs `Host`, `HostName`, `User`, `Port`, `IdentityFile`. Include directives are a nice-to-have.
+   - RESOLVED: Hand-roll a minimal parser modeled on Go `config.go`. Only needs `Host`, `HostName`, `User`, `Port`, `IdentityFile`. No new dependency added for SSH config parsing. Include directives handled via path expansion.
 
 2. **stats fetch (remote statsagent) endpoint format**
    - What we know: statsagent is a Go binary; it likely exposes HTTP JSON. PY-04 says "fetch from remote statsagent endpoint."
    - What's unclear: The endpoint URL format (`/stats`, `/snapshot`, etc.) and whether it returns `TelemetryPayload` or `StatsSnapshot` proto JSON.
-   - Recommendation: Implement `adsops stats fetch <host> [--port 9100]` with a configurable port. Parse response as `TelemetryPayload` proto JSON; fall back to raw JSON print if parsing fails.
+   - RESOLVED: Endpoint is `GET http://{host}:{port}/stats` (default port from statsagent config, default 9100). Returns proto-encoded `TelemetryPayload` as JSON. Implementation uses `adsops stats fetch <host> [--port 9100]` with configurable port. Parsed via `google.protobuf.json_format.Parse` into `TelemetryPayload`; falls back to raw JSON print if parsing fails.
 
 ---
 
