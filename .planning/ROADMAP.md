@@ -33,7 +33,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   5. `gen/` directory is committed to the repo (downstream phases can import without buf installed)
 **Plans**: 3 plans
 Plans:
-- [ ] 01-01-PLAN.md — buf toolchain setup, config files, Makefile targets
+- [x] 01-01-PLAN.md — buf toolchain setup, config files, Makefile targets
 - [ ] 01-02-PLAN.md — proto definitions (all 5 .proto files)
 - [ ] 01-03-PLAN.md — code generation, Python packaging, Go/Python verification
 **UI hint**: no
