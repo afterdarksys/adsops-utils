@@ -1,4 +1,4 @@
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 
 
 class MockNamespace:
@@ -34,7 +34,7 @@ class MockSys:
         result = sys.net.http_get("https://example.com")  # returns "OK"
     """
 
-    def __init__(self, fixtures: dict[str, Any] | None = None):
+    def __init__(self, fixtures: Optional[dict[str, Any]] = None):
         fixtures = fixtures or {}
         # All 14 namespaces from sysscript.go (VERIFIED) + k3s stub for Phase 3
         self.net = MockNamespace("net", fixtures)
