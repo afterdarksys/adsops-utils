@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package adsops.v1;
+
+import "adsops/v1/container.proto";
+import "adsops/v1/k3s.proto";
+
+message HostInfo {
+  string hostname = 1;
+  string os = 2;
+  string platform = 3;
+  uint64 uptime = 4;
+}
+
+message CpuMetrics {
+  double usage_percent = 1;
+  int32 cores = 2;
+}
+
+message MemoryMetrics {
+  uint64 total = 1;
+  uint64 used = 2;
+  uint64 free = 3;
+  double used_percent = 4;
+}
+
+message DiskMetrics {
+  string path = 1;
+  uint64 total = 2;
+  uint64 used = 3;
+  uint64 free = 4;
+  double used_percent = 5;
+}
+
+message NetworkMetrics {
+  uint64 bytes_recv = 1;
+  uint64 bytes_sent = 2;
+}
+
+message SoftwareInfo {
+  string name = 1;
+  string version = 2;
+}
+
+message TelemetryPayload {
+  int64 timestamp = 1;
+  string host_id = 2;
+  HostInfo host_info = 3;
+  CpuMetrics cpu = 4;
+  MemoryMetrics memory = 5;
+  repeated DiskMetrics disk = 6;
+  NetworkMetrics network = 7;
+  repeated SoftwareInfo software = 8;
+  DockerStats docker = 9;
+  K3sStats k3s = 10;
+}

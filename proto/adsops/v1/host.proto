@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package adsops.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+message HostRecord {
+  int32 id = 1;
+  string resource_name = 2;
+  string hostname = 3;
+  string type = 4;
+  string provider = 5;
+  optional string region = 6;
+  string status = 7;
+  string environment = 8;
+  repeated string owners = 9;
+  repeated string mail_groups = 10;
+  google.protobuf.Struct metadata = 11;
+  optional double average_daily_cost = 12;
+  optional double average_monthly_cost = 13;
+  optional string external_id = 14;
+  optional string external_url = 15;
+  google.protobuf.Timestamp created_at = 16;
+  google.protobuf.Timestamp updated_at = 17;
+  repeated HostRecord children = 18;
+}
