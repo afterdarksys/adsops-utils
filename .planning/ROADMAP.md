@@ -72,7 +72,7 @@ Plans:
 **Plans**: 4 plans
 Plans:
 **Wave 1**
-- [ ] 03-01-PLAN.md — Foundation: go.mod, entitlements, Thread.Load, client type stubs
+- [x] 03-01-PLAN.md — Foundation: go.mod, entitlements, Thread.Load, client type stubs
 
 **Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 03-02-PLAN.md — Docker client + sys.containers builtins + tests
