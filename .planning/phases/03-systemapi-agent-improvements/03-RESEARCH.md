@@ -662,22 +662,22 @@ func (engine *SysscriptEngine) containersList(thread *starlark.Thread, b *starla
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Docker API version negotiation vs hardcoded v1.41**
    - What we know: D-03 leaves this to Claude's discretion. v1.41 corresponds to Docker Engine 20.10+ which is widely deployed.
    - What's unclear: Target host Docker versions. Some hosts may be newer (v1.45+) or older.
-   - Recommendation: Hardcode `v1.41` for simplicity — it's a minimum baseline API version that has all needed endpoints. Docker daemons are forward-compatible.
+   - RESOLVED: Hardcode `v1.41` for simplicity — it's a minimum baseline API version that has all needed endpoints. Docker daemons are forward-compatible.
 
 2. **Caching Docker/k3s data between telemetry ticks**
    - What we know: Left to Claude's discretion. Telemetry runs every 5s. Docker stats call is fast (single HTTP round-trip over Unix socket).
    - What's unclear: Whether 5s polling overhead is a concern on resource-constrained edge hosts.
-   - Recommendation: Re-query every tick (no caching). Simpler code. The stats call hits local socket with negligible overhead. Mirrors how `gatherSoftware()` is already cached separately (every 5min), not how base metrics work.
+   - RESOLVED: Re-query every tick (no caching). Simpler code. The stats call hits local socket with negligible overhead. Mirrors how `gatherSoftware()` is already cached separately (every 5min), not how base metrics work.
 
 3. **`sys.k3s.apply(yaml_str)` — which Kubernetes resource types?**
    - What we know: D-06 says implement as raw HTTP PATCH/POST. The function takes a YAML string.
    - What's unclear: How to route to the correct API group/resource from a generic YAML string.
-   - Recommendation: Parse the `kind` and `apiVersion` from the YAML to determine the endpoint. For Phase 3, support core v1 resources (ConfigMap, Pod) and `apps/v1` (Deployment). Document that the implementation does not do full `kubectl apply` semantics — it's a POST (create) with a conflict fallback to PATCH.
+   - RESOLVED: Parse the `kind` and `apiVersion` from the YAML to determine the endpoint. For Phase 3, support core v1 resources (ConfigMap, Pod) and `apps/v1` (Deployment). Document that the implementation does not do full `kubectl apply` semantics — it's a POST (create) with a conflict fallback to PATCH.
 
 ---
 
