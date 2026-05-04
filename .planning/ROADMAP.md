@@ -50,7 +50,7 @@ Plans:
   5. `MockSys` passes all unit tests without requiring SSH, Docker, or a live agent — test suite runs with `pytest tools/adsops/`
 **Plans**: 3 plans
 Plans:
-- [ ] 02-01-PLAN.md — Package scaffolding, config, output utils, hostctl module + tests
+- [x] 02-01-PLAN.md — Package scaffolding, config, output utils, hostctl module + tests
 - [ ] 02-02-PLAN.md — infractl module (asyncssh, Docker, k3s commands) + tests
 - [ ] 02-03-PLAN.md — stats module, MockSys harness, CLI finalization + tests
 **UI hint**: no
