@@ -132,4 +132,4 @@ proto-lint:
 
 ## proto-breaking: Check for breaking changes against main
 proto-breaking:
-	buf breaking proto/ --against '.git#branch=main'
+	buf breaking proto/ --against '.git#branch=main,subdir=proto'
