@@ -1,0 +1,10 @@
+{
+  "yolo": true,
+  "granularity": "standard",
+  "git_strategy": "per-phase-branches",
+  "commit_docs": true,
+  "workflow": {
+    "use_worktrees": true,
+    "code_review": true
+  }
+}
