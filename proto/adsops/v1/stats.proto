@@ -1,0 +1,99 @@
+syntax = "proto3";
+
+package adsops.v1;
+
+import "google/protobuf/timestamp.proto";
+import "adsops/v1/container.proto";
+import "adsops/v1/k3s.proto";
+
+message SystemStats {
+  string hostname = 1;
+  double uptime_seconds = 2;
+  double load_avg_1m = 3;
+  double load_avg_5m = 4;
+  double load_avg_15m = 5;
+  double cpu_used_pct = 6;
+  double cpu_idle_pct = 7;
+  double cpu_iowait_pct = 8;
+  int32 cpu_cores = 9;
+  int64 mem_total_bytes = 10;
+  int64 mem_available_bytes = 11;
+  int64 mem_used_bytes = 12;
+  double mem_used_pct = 13;
+  int64 mem_cached_bytes = 14;
+  int64 mem_buffers_bytes = 15;
+  int64 swap_total_bytes = 16;
+  int64 swap_used_bytes = 17;
+  double swap_used_pct = 18;
+}
+
+message MountStats {
+  string device = 1;
+  string mount_point = 2;
+  string fstype = 3;
+  int64 total_bytes = 4;
+  int64 used_bytes = 5;
+  int64 free_bytes = 6;
+  double used_pct = 7;
+}
+
+message IOStats {
+  string device = 1;
+  double reads_per_sec = 2;
+  double writes_per_sec = 3;
+  double read_bytes_per_sec = 4;
+  double write_bytes_per_sec = 5;
+  double await_ms = 6;
+  double util_pct = 7;
+}
+
+message DiskStats {
+  repeated MountStats mounts = 1;
+  repeated IOStats devices = 2;
+}
+
+message InterfaceStat {
+  string name = 1;
+  double rx_bytes_per_sec = 2;
+  double tx_bytes_per_sec = 3;
+  double rx_pkts_per_sec = 4;
+  double tx_pkts_per_sec = 5;
+  uint64 rx_errors = 6;
+  uint64 tx_errors = 7;
+  uint64 rx_dropped = 8;
+  uint64 tx_dropped = 9;
+  uint64 rx_total_bytes = 10;
+  uint64 tx_total_bytes = 11;
+}
+
+message NetworkStats {
+  repeated InterfaceStat interfaces = 1;
+}
+
+message ProcInfo {
+  int32 pid = 1;
+  string name = 2;
+  string state = 3;
+  double cpu_pct = 4;
+  int64 mem_rss_bytes = 5;
+  double mem_pct = 6;
+}
+
+message ProcessStats {
+  int32 total_procs = 1;
+  int32 running_procs = 2;
+  int32 zombie_procs = 3;
+  repeated ProcInfo top_cpu = 4;
+  repeated ProcInfo top_mem = 5;
+}
+
+message StatsSnapshot {
+  google.protobuf.Timestamp timestamp = 1;
+  string context = 2;
+  SystemStats system = 3;
+  DiskStats disk = 4;
+  NetworkStats network = 5;
+  ProcessStats process = 6;
+  DockerStats docker = 7;
+  K3sStats k3s = 8;
+}
