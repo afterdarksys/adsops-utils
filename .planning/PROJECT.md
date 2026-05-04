@@ -26,9 +26,9 @@ Every component — Go tool, Python script, Sysscript, deployed agent — shares
 - [x] Python3 bindings generated from protos — Validated in Phase 1
 - [x] Python3 package (tools/adsops/) with CLI parity: hostctl, infractl, stats modules — Validated in Phase 2
 - [x] Python3 sysscript test harness: mock sys module for local .star testing — Validated in Phase 2
-- [ ] systemapi-agent: real sys.containers (Docker socket, not stub)
-- [ ] systemapi-agent: sys.k3s module (Kubernetes API)
-- [ ] systemapi-agent: telemetry includes Docker container stats + k3s state
+- [x] systemapi-agent: real sys.containers (Docker socket, not stub) — Validated in Phase 3
+- [x] systemapi-agent: sys.k3s module (Kubernetes API) — Validated in Phase 3
+- [x] systemapi-agent: telemetry includes Docker container stats + k3s state — Validated in Phase 3
 - [ ] Sysscript shared library: sysscripts/lib/ with common helpers
 - [ ] Sysscript per-service scripts: sysscripts/services/{name}/ for each product
 - [ ] Hierarchical inventory model: hosts → containers → pods
@@ -85,4 +85,4 @@ Python is currently scattered standalone scripts with no package structure, no p
 | YOLO execution | Autonomous phase execution, per-phase branches | ✓ Decided |
 
 ---
-*Last updated: 2026-05-04 — Phase 1 complete (proto data contracts)*
+*Last updated: 2026-05-04 — Phase 3 complete (systemapi-agent Docker + k3s + telemetry)*
