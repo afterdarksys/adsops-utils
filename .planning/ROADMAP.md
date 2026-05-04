@@ -79,7 +79,7 @@ Plans:
 - [x] 03-03-PLAN.md — k3s client + sys.k3s builtins + tests
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 03-04-PLAN.md — Telemetry extension with Docker/k3s fields + tests
+- [x] 03-04-PLAN.md — Telemetry extension with Docker/k3s fields + tests
 **UI hint**: no
 
 ### Phase 4: Sysscript Ecosystem
@@ -111,8 +111,8 @@ Plans:
 **Plans**: 4 plans
 Plans:
 - [x] 03-01-PLAN.md — Foundation: go.mod, entitlements, Thread.Load, client type stubs
-- [ ] 03-02-PLAN.md — Docker client + sys.containers builtins + tests
-- [ ] 03-03-PLAN.md — k3s client + sys.k3s builtins + tests
+- [x] 03-02-PLAN.md — Docker client + sys.containers builtins + tests
+- [x] 03-03-PLAN.md — k3s client + sys.k3s builtins + tests
 - [ ] 03-04-PLAN.md — Telemetry extension with Docker/k3s fields + tests
 **UI hint**: no
 
@@ -128,7 +128,7 @@ Plans:
   5. RBAC manifest creates ServiceAccount, ClusterRole, and ClusterRoleBinding for the agent DaemonSet
 **Plans**: 4 plans
 Plans:
-- [ ] 03-01-PLAN.md — Foundation: go.mod, entitlements, Thread.Load, client type stubs
+- [x] 03-01-PLAN.md — Foundation: go.mod, entitlements, Thread.Load, client type stubs
 - [ ] 03-02-PLAN.md — Docker client + sys.containers builtins + tests
 - [ ] 03-03-PLAN.md — k3s client + sys.k3s builtins + tests
 - [ ] 03-04-PLAN.md — Telemetry extension with Docker/k3s fields + tests
