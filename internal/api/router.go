@@ -128,6 +128,46 @@ func NewRouter(cfg *config.Config, logger *zap.Logger) *gin.Engine {
 				reports.GET("/compliance/:framework", handlers.ComplianceReport)
 				reports.GET("/user-activity/:user_id", handlers.UserActivityReport)
 			}
+
+			// Agents
+			agents := protected.Group("/agents")
+			{
+				agents.GET("", handlers.ListAgents)
+				agents.GET("/:agent_id", handlers.GetAgent)
+				agents.GET("/:agent_id/tickets", handlers.GetAgentTickets)
+				agents.POST("/:agent_id/notify", handlers.NotifyAgent)
+				agents.GET("/:agent_id/activity", handlers.GetAgentActivity)
+				agents.POST("/tokens", handlers.IssueAgentToken)
+				agents.DELETE("/tokens/:token_id", handlers.RevokeAgentToken)
+			}
+
+			// Infrastructure (admin or operator only)
+			infra := protected.Group("/infra")
+			infra.Use(middleware.RequireRole("admin", "operator"))
+			{
+				// Docker
+				docker := infra.Group("/docker")
+				{
+					docker.GET("/containers", handlers.ListContainers)
+					docker.GET("/containers/:id/logs", handlers.GetContainerLogs)
+					docker.POST("/containers/:id/:action", handlers.ContainerAction)
+				}
+
+				// Kubernetes
+				k8s := infra.Group("/k8s")
+				{
+					k8s.GET("/pods", handlers.ListPods)
+					k8s.GET("/deployments", handlers.ListDeployments)
+					k8s.POST("/deployments/:name/scale", handlers.ScaleDeployment)
+					k8s.GET("/pods/:name/logs", handlers.GetPodLogs)
+				}
+
+				// System
+				system := infra.Group("/system")
+				{
+					system.GET("/metrics", handlers.GetSystemMetrics)
+				}
+			}
 		}
 	}
 
