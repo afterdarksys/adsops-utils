@@ -21,9 +21,9 @@ Every component — Go tool, Python script, Sysscript, deployed agent — shares
 
 ### Active
 
-- [ ] Proto data contracts: shared .proto definitions for TelemetryPayload, HostRecord, ContainerStats, K3sStats, StatsSnapshot
-- [ ] Go bindings generated from protos (consumed by statsagent, future API)
-- [ ] Python3 bindings generated from protos
+- [x] Proto data contracts: shared .proto definitions for TelemetryPayload, HostRecord, ContainerStats, K3sStats, StatsSnapshot — Validated in Phase 1
+- [x] Go bindings generated from protos (consumed by statsagent, future API) — Validated in Phase 1
+- [x] Python3 bindings generated from protos — Validated in Phase 1
 - [ ] Python3 package (tools/adsops/) with CLI parity: hostctl, infractl, stats modules
 - [ ] Python3 sysscript test harness: mock sys module for local .star testing
 - [ ] systemapi-agent: real sys.containers (Docker socket, not stub)
@@ -85,4 +85,4 @@ Python is currently scattered standalone scripts with no package structure, no p
 | YOLO execution | Autonomous phase execution, per-phase branches | ✓ Decided |
 
 ---
-*Last updated: 2026-05-04 — initial project setup*
+*Last updated: 2026-05-04 — Phase 1 complete (proto data contracts)*
