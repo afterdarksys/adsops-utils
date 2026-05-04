@@ -69,7 +69,12 @@ Plans:
   4. Every 5-second telemetry push to systemapi.io includes Docker container stats and k3s cluster state fields
   5. A sysscript containing `load("lib/helper.star", "fn")` executes without error (Thread.Load is wired)
   6. `sys.containers` and `sys.k3s` namespaces are absent (not just empty) when the agent lacks the required entitlement
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 03-01-PLAN.md — Foundation: go.mod, entitlements, Thread.Load, client type stubs
+- [ ] 03-02-PLAN.md — Docker client + sys.containers builtins + tests
+- [ ] 03-03-PLAN.md — k3s client + sys.k3s builtins + tests
+- [ ] 03-04-PLAN.md — Telemetry extension with Docker/k3s fields + tests
 **UI hint**: no
 
 ### Phase 4: Sysscript Ecosystem
@@ -81,7 +86,12 @@ Plans:
   2. `sysscripts/lib/host.star`, `sysscripts/lib/docker.star`, and `sysscripts/lib/k3s.star` are importable from service scripts via `load()`
   3. Each `.star` script under `sysscripts/services/` has a corresponding passing test in `tools/adsops/tests/sysscripts/`
   4. `sysscripts/services/changes-api/stats.star` returns request counts and latency when run against a live host
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 03-01-PLAN.md — Foundation: go.mod, entitlements, Thread.Load, client type stubs
+- [ ] 03-02-PLAN.md — Docker client + sys.containers builtins + tests
+- [ ] 03-03-PLAN.md — k3s client + sys.k3s builtins + tests
+- [ ] 03-04-PLAN.md — Telemetry extension with Docker/k3s fields + tests
 **UI hint**: no
 
 ### Phase 5: Inventory Hierarchy
@@ -93,7 +103,12 @@ Plans:
   2. `infractl scan --all` discovers containers and pods on all hosts and writes them into hostctl inventory (visible in subsequent `hostctl list --children`)
   3. `hostctl export --json` produces output whose shape matches the HostRecord proto definition (no sql.NullString, uses *string pointers)
   4. Pre-condition confirmed: metadata column type verified and migrated to jsonb if needed before any scan writeback
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 03-01-PLAN.md — Foundation: go.mod, entitlements, Thread.Load, client type stubs
+- [ ] 03-02-PLAN.md — Docker client + sys.containers builtins + tests
+- [ ] 03-03-PLAN.md — k3s client + sys.k3s builtins + tests
+- [ ] 03-04-PLAN.md — Telemetry extension with Docker/k3s fields + tests
 **UI hint**: no
 
 ### Phase 6: Deployment Artifacts
@@ -106,7 +121,12 @@ Plans:
   3. `kubectl apply -f deployments/kubernetes/` deploys systemapi-agent as a DaemonSet with Docker socket access and k3s kubeconfig mounted
   4. `docker compose --profile tools up` starts hostctl and statsagent services alongside existing services
   5. RBAC manifest creates ServiceAccount, ClusterRole, and ClusterRoleBinding for the agent DaemonSet
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 03-01-PLAN.md — Foundation: go.mod, entitlements, Thread.Load, client type stubs
+- [ ] 03-02-PLAN.md — Docker client + sys.containers builtins + tests
+- [ ] 03-03-PLAN.md — k3s client + sys.k3s builtins + tests
+- [ ] 03-04-PLAN.md — Telemetry extension with Docker/k3s fields + tests
 **UI hint**: no
 
 ## Progress
