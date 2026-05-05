@@ -100,7 +100,7 @@ Plans:
 - [x] 04-02-PLAN.md — Shared lib helpers (host.star, docker.star, k3s.star) + tests
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 04-03-PLAN.md — Service scripts (statsagent, changes-api health/stats) + tests + verification
+- [x] 04-03-PLAN.md — Service scripts (statsagent, changes-api health/stats) + tests + verification
 **UI hint**: no
 
 ### Phase 5: Inventory Hierarchy
