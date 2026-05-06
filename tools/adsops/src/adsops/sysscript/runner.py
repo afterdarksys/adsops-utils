@@ -7,6 +7,16 @@ _LOAD_PATTERN = re.compile(
     r"""load\(\s*["']([^"']+)["'](?:\s*,\s*["']\w+["'])*\s*\)\n?"""
 )
 
+# Explicit allowlist of builtins exposed to .star scripts.  exec() without a
+# "__builtins__" key injects the full builtins module, giving scripts access to
+# __import__, open, eval, etc.  An explicit allowlist closes that bypass (CR-04).
+_SAFE_BUILTINS = {
+    "len": len, "range": range, "print": print, "str": str,
+    "int": int, "float": float, "bool": bool, "list": list,
+    "dict": dict, "all": all, "any": any, "None": None,
+    "True": True, "False": False,
+}
+
 
 class SysscriptRunner:
     """Execute .star (Starlark) files via Python exec() with load() resolution and sandbox enforcement.
@@ -57,19 +67,40 @@ class SysscriptRunner:
         """
         path = pathlib.Path(script_path).resolve()
         root = self._find_sysscripts_root(path)
+        # Enforce that the entry-point itself is inside the sandbox root (CR-01).
+        # _find_sysscripts_root walks *ancestors* of path, so root is always an
+        # ancestor — but we must confirm the discovered root is a legitimate parent
+        # of this specific resolved path (guards against a sysscripts/ dir that is
+        # a sibling rather than an ancestor due to symlink tricks).
+        root_resolved = root.resolve()
+        if not str(path).startswith(str(root_resolved) + os.sep):
+            raise ValueError(
+                f"Script {path} is not inside sysscripts root {root_resolved}"
+            )
         content = path.read_text()
 
-        globs = {"sys": self._sys}
+        globs = {"sys": self._sys, "__builtins__": _SAFE_BUILTINS}
 
         # Pre-execute load() targets (in order found) into shared globals
         for m in _LOAD_PATTERN.finditer(content):
             lib_path = self._resolve_load(m.group(1), path.parent, root)
             lib_src = lib_path.read_text()
-            # Strip nested load() from lib (recursive resolution not needed for MVP)
-            lib_src_clean = _LOAD_PATTERN.sub("", lib_src)
-            exec(compile(lib_src_clean, str(lib_path), "exec"), globs)
+            # Reject lib files that contain nested load() — silent dropping masks
+            # missing dependencies with confusing NameErrors at runtime (WR-03).
+            if _LOAD_PATTERN.search(lib_src):
+                raise ValueError(
+                    f"Nested load() in lib file {lib_path} is not supported"
+                )
+            exec(compile(lib_src, str(lib_path), "exec"), globs)
 
         # Strip load() statements from main script then execute
         main_src = _LOAD_PATTERN.sub("", content)
+        # Guard: any unrecognised load() syntax not caught by the regex is a
+        # hard error — the sandbox's path-traversal check depends on the regex
+        # matching every load() call (CR-02).
+        if re.search(r'\bload\s*\(', main_src):
+            raise ValueError(
+                "Unrecognised load() syntax — cannot safely sandbox this script"
+            )
         exec(compile(main_src, str(path), "exec"), globs)
         return globs
