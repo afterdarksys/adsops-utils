@@ -22,3 +22,9 @@ def run_cmd(script: str = typer.Argument(..., help="Path to .star script")) -> N
     except ValueError as e:
         typer.echo(f"ERROR: {e}", err=True)
         raise typer.Exit(1)
+    except (FileNotFoundError, PermissionError) as e:
+        typer.echo(f"ERROR: Cannot read script: {e}", err=True)
+        raise typer.Exit(1)
+    except SyntaxError as e:
+        typer.echo(f"ERROR: Script syntax error: {e}", err=True)
+        raise typer.Exit(1)
