@@ -1,6 +1,7 @@
 import os
 import re
 import pathlib
+from typing import Optional
 from adsops.sysscript.mock import MockSys
 
 _LOAD_PATTERN = re.compile(
@@ -30,8 +31,13 @@ class SysscriptRunner:
     Per D-07: root auto-discovered by walking ancestors for directory named 'sysscripts'.
     """
 
-    def __init__(self, sys_global=None):
+    def __init__(self, sys_global=None, sysscripts_root: Optional[str] = None):
         self._sys = sys_global if sys_global is not None else MockSys()
+        # Callers (CLI, tests) can pin the sandbox root to a known-safe path
+        # instead of relying on filesystem auto-discovery (WR-05).
+        self._root_override: Optional[pathlib.Path] = (
+            pathlib.Path(sysscripts_root).resolve() if sysscripts_root else None
+        )
 
     def _find_sysscripts_root(self, script_path: pathlib.Path) -> pathlib.Path:
         """Walk ancestors to find nearest directory named 'sysscripts' (D-07)."""
@@ -66,7 +72,7 @@ class SysscriptRunner:
         globals dict so lib functions are available in the main script.
         """
         path = pathlib.Path(script_path).resolve()
-        root = self._find_sysscripts_root(path)
+        root = self._root_override if self._root_override is not None else self._find_sysscripts_root(path)
         # Enforce that the entry-point itself is inside the sandbox root (CR-01).
         # _find_sysscripts_root walks *ancestors* of path, so root is always an
         # ancestor — but we must confirm the discovered root is a legitimate parent
