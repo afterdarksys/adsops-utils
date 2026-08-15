@@ -54,14 +54,15 @@ Examples:
 }
 
 type scanResult struct {
-	hostname string
-	ok       bool
-	os       string
-	osVer    string
-	docker   string // version or ""
-	k3s      string // version or ""
-	stats    bool   // statsagent running?
-	err      string
+	hostname    string
+	ok          bool
+	os          string
+	osVer       string
+	docker      string // version or ""
+	k3s         string // version or ""
+	stats       bool   // statsagent running?
+	nodeExp     string // node_exporter version or ""
+	err         string
 }
 
 var scanScript = `
@@ -83,6 +84,15 @@ echo "K3S_VER=$K3S_VER"
 STATS="0"
 if curl -sf http://localhost:9100/health >/dev/null 2>&1; then STATS="1"; fi
 echo "STATS=$STATS"
+NE_VER=""
+if curl -sf http://localhost:9100/metrics 2>/dev/null | grep -q 'node_exporter_build_info{'; then
+    NE_VER=$(curl -sf http://localhost:9100/metrics 2>/dev/null | grep '^node_exporter_build_info{' | sed 's/.*version="\([^"]*\)".*/\1/' | head -1)
+    [ -z "$NE_VER" ] && NE_VER="running"
+elif command -v node_exporter >/dev/null 2>&1 || [ -f /usr/local/bin/node_exporter ]; then
+    BIN_VER=$(node_exporter --version 2>&1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1 || true)
+    NE_VER="${BIN_VER:+${BIN_VER} }(stopped)"
+fi
+echo "NE_VER=$NE_VER"
 `
 
 func runScan(hosts []*inventory.HostRecord) error {
@@ -102,9 +112,9 @@ func runScan(hosts []*inventory.HostRecord) error {
 	wg.Wait()
 
 	// Print results table
-	fmt.Printf("\n%-24s %-10s %-8s %-18s %-18s %-7s\n",
-		"HOST", "STATUS", "OS", "DOCKER", "K3S", "STATS")
-	fmt.Println(strings.Repeat("─", 90))
+	fmt.Printf("\n%-24s %-10s %-8s %-18s %-18s %-7s %-10s\n",
+		"HOST", "STATUS", "OS", "DOCKER", "K3S", "STATS", "NODE_EXP")
+	fmt.Println(strings.Repeat("─", 100))
 
 	for _, r := range results {
 		status := colorize("green", "OK")
@@ -132,11 +142,16 @@ func runScan(hosts []*inventory.HostRecord) error {
 			statsStr = colorize("green", "yes")
 		}
 
+		neStr := colorize("yellow", "no")
+		if r.nodeExp != "" {
+			neStr = colorize("green", r.nodeExp)
+		}
+
 		if !r.ok {
 			fmt.Printf("%-24s %-10s %s\n", r.hostname, status, colorize("red", r.err))
 		} else {
-			fmt.Printf("%-24s %-10s %-8s %-18s %-18s %-7s\n",
-				r.hostname, status, osStr, dockerStr, k3sStr, statsStr)
+			fmt.Printf("%-24s %-10s %-8s %-18s %-18s %-7s %-10s\n",
+				r.hostname, status, osStr, dockerStr, k3sStr, statsStr, neStr)
 		}
 	}
 	fmt.Println()
@@ -180,6 +195,8 @@ func scanHost(hostname string) scanResult {
 			r.k3s = v
 		case "STATS":
 			r.stats = v == "1"
+		case "NE_VER":
+			r.nodeExp = v
 		}
 	}
 	return r

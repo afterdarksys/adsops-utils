@@ -43,6 +43,7 @@ Examples:
 	root.AddCommand(cmd.NewStatusCommand())
 	root.AddCommand(cmd.NewDockerCommand())
 	root.AddCommand(cmd.NewK3sCommand())
+	root.AddCommand(cmd.NewMetricsCommand())
 
 	if err := root.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)

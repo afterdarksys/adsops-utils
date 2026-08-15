@@ -19,9 +19,11 @@ app = typer.Typer(
 )
 docker_app = typer.Typer(help="Docker commands over SSH", no_args_is_help=True)
 k3s_app = typer.Typer(help="k3s/kubectl commands over SSH", no_args_is_help=True)
+metrics_app = typer.Typer(help="node_exporter metrics commands", no_args_is_help=True)
 
 app.add_typer(docker_app, name="docker")
 app.add_typer(k3s_app, name="k3s")
+app.add_typer(metrics_app, name="metrics")
 
 
 # ---------------------------------------------------------------------------
@@ -234,3 +236,74 @@ def k3s_apply_cmd(
     from adsops.infractl.k3s import k3s_apply
 
     k3s_apply(host, file, delete=delete)
+
+
+# ---------------------------------------------------------------------------
+# Metrics commands
+# ---------------------------------------------------------------------------
+
+
+@metrics_app.command("show")
+def metrics_show_cmd(
+    host: str = typer.Argument(..., help="Remote host"),
+    port: int = typer.Option(9100, "--port", help="node_exporter port"),
+) -> None:
+    """Display a node_exporter metrics summary for a host."""
+    from adsops.infractl.metrics import metrics_show
+
+    metrics_show(host, port)
+
+
+@metrics_app.command("top")
+def metrics_top_cmd(
+    hosts: List[str] = typer.Argument(..., help="Host(s) to query"),
+    port: int = typer.Option(9100, "--port", help="node_exporter port"),
+    sort_by: Optional[str] = typer.Option(None, "--sort", help="Sort by column: load, cpu, mem, disk"),
+    warn_cpu: float = typer.Option(0.0, "--warn-cpu", help="Only show hosts with CPU% >= threshold"),
+    warn_mem: float = typer.Option(0.0, "--warn-mem", help="Only show hosts with mem% >= threshold"),
+    warn_disk: float = typer.Option(0.0, "--warn-disk", help="Only show hosts with disk(/)% >= threshold"),
+) -> None:
+    """Show a node_exporter vitals table across multiple hosts."""
+    from adsops.infractl.metrics import metrics_top
+
+    metrics_top(list(hosts), port, sort_by=sort_by, warn_cpu=warn_cpu, warn_mem=warn_mem, warn_disk=warn_disk)
+
+
+@metrics_app.command("query")
+def metrics_query_cmd(
+    pattern: str = typer.Argument(..., help="Metric name pattern (substring or glob with *)"),
+    hosts: List[str] = typer.Argument(..., help="Host(s) to query"),
+    port: int = typer.Option(9100, "--port", help="node_exporter port"),
+) -> None:
+    """Search node_exporter metrics by name pattern on one or more hosts."""
+    from adsops.infractl.metrics import metrics_query
+
+    metrics_query(pattern, list(hosts), port)
+
+
+@metrics_app.command("install")
+def metrics_install_cmd(
+    hosts: List[str] = typer.Argument(..., help="Host(s) to install on"),
+    version: str = typer.Option("1.8.2", "--version", help="node_exporter version to install"),
+) -> None:
+    """Install node_exporter on remote hosts via SSH."""
+    from adsops.infractl.metrics import metrics_install
+
+    metrics_install(list(hosts), version)
+
+
+@metrics_app.command("service")
+def metrics_service_cmd(
+    action: str = typer.Argument(..., help="Action: start, stop, restart, or status"),
+    hosts: List[str] = typer.Argument(..., help="Host(s) to manage"),
+) -> None:
+    """Manage the node_exporter systemd service on remote hosts."""
+    if action not in ("start", "stop", "restart", "status"):
+        typer.echo(
+            f"Unknown action {action!r} — must be start, stop, restart, or status",
+            err=True,
+        )
+        raise typer.Exit(1)
+    from adsops.infractl.metrics import metrics_service
+
+    metrics_service(action, list(hosts))
