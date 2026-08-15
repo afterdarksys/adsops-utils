@@ -82,3 +82,6 @@ __debug_bin
 go.work.sum
 tools/blackout/blackout-linux
 tools/hostctl/hostctl-linux
+
+tools/infractl/infractl
+.omc/
