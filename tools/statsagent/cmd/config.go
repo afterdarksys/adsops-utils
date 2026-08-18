@@ -10,9 +10,12 @@ import (
 
 // Config holds all runtime configuration for statsagent.
 type Config struct {
-	Port          int
-	Interval      time.Duration
-	PushEndpoint  string
+	Port         int
+	Interval     time.Duration
+	PushEndpoint string
+	// APIKey authenticates pushes to the ADS control plane. Sent as the
+	// X-API-Key header; never logged.
+	APIKey        string
 	PushInterval  time.Duration
 	Labels        map[string]string
 	DockerSocket  string
@@ -50,6 +53,23 @@ func DefaultConfig() *Config {
 	}
 	if v := os.Getenv("STATSAGENT_PUSH_ENDPOINT"); v != "" {
 		c.PushEndpoint = v
+	}
+	// API key. The _FILE variant takes precedence: it is the safer way to hand a
+	// secret to a container (Docker/Kubernetes secrets land on disk, not in the
+	// environment, where they would be visible to `docker inspect` and to any
+	// child process). Whitespace is trimmed because files usually end in a newline.
+	if v := os.Getenv("STATSAGENT_API_KEY_FILE"); v != "" {
+		if data, err := os.ReadFile(v); err == nil {
+			c.APIKey = strings.TrimSpace(string(data))
+		}
+		// A read failure is deliberately silent here: config loading has no logger
+		// and must not print anything that hints at the secret's location. push
+		// reports the resulting "no API key" condition instead.
+	}
+	if c.APIKey == "" {
+		if v := os.Getenv("STATSAGENT_API_KEY"); v != "" {
+			c.APIKey = strings.TrimSpace(v)
+		}
 	}
 	if v := os.Getenv("STATSAGENT_PUSH_INTERVAL"); v != "" {
 		if d, err := time.ParseDuration(v); err == nil {
